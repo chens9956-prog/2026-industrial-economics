@@ -37,8 +37,8 @@
 | 层级 | 平台 | 位置 | 读取时机 |
 |------|------|------|---------|
 | L1 | 本地（GDrive） | `AGENTS.md`＋`handoff.md` | 每个 session |
-| L2 | GitHub | 本地已初始化 / 待建立远程 repo | 指定时 |
-| L3 | Obsidian | 待建立 (2026产业经济学/专案工作流程.md) | 有需要时 |
+| L2 | GitHub | https://github.com/chens9956-prog/2026-industrial-economics | 指定时 |
+| L3 | Obsidian | 2026产业经济学/专案工作流程.md | 有需要时 |
 
 ## 工作约定
 - 任何 Agent、任何电脑：**开工先读 `handoff.md`，收工必更新 `handoff.md`**
