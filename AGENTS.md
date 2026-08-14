@@ -29,6 +29,7 @@
 ├── voxcpm2-voice-cloner/         # 语音克隆工具
 ├── handoff.md                    # 交接状态文件
 ├── fetch_md.py                   # 抓取 YouTube 字幕脚本
+├── json_to_md_robust.py          # 强健版 JSON 转 Markdown 字幕处理脚本
 └── ... (各类课件 pptx 及文档资料)
 ```
 
