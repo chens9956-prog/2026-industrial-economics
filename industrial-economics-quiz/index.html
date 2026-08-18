@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产业经济学试题库与在线测评系统 | Industrial Economics Exam Bank</title>
+    <meta name="description" content="包含单项选择题、名词解释、简答题、计算题、综述论述题的专业产业经济学在线题库与交互练习系统。">
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        accent: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- KaTeX Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 font-bold text-xl">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-heading font-extrabold text-lg sm:text-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 bg-clip-text text-transparent">
+                            产业经济学精选题库
+                        </h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                            Industrial Economics Question Bank & Practice System
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <!-- Practice / Study Mode Toggle -->
+                    <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-700">
+                        <button id="mode-browse" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 active-mode shadow-sm bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300">
+                            <i class="fa-solid fa-book-open mr-1.5"></i>浏览模式
+                        </button>
+                        <button id="mode-quiz" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-200">
+                            <i class="fa-solid fa-gamepad mr-1.5"></i>模拟答题
+                        </button>
+                    </div>
+
+                    <!-- Export Button -->
+                    <button id="btn-export" title="导出试卷/题库" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all">
+                        <i class="fa-solid fa-file-export"></i>
+                    </button>
+
+                    <!-- Theme Toggle Button -->
+                    <button id="btn-theme" title="切换暗黑模式" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Hero & Stats Dashboard -->
+        <section class="mb-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white shadow-2xl relative overflow-hidden">
+            <!-- Decorative Glow Background -->
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-8 space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-300 text-xs font-semibold border border-white/10 backdrop-blur-md">
+                        <i class="fa-solid fa-graduation-cap"></i> 考研、期末复习 & 博士考核精选题库
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight font-heading leading-tight">
+                        掌握市场结构、企业行为与产业政策核心考点
+                    </h2>
+                    <p class="text-indigo-200/80 text-sm sm:text-base max-w-2xl">
+                        涵盖 SCP 范式、寡头博弈模型（古诺/伯特兰/斯塔克尔伯格）、市场势力度量（Lerner/HHI）、价格歧视与规制经济学精选例题。
+                    </p>
+                </div>
+
+                <!-- Quick Stats Grid -->
+                <div class="lg:col-span-4 grid grid-cols-2 gap-3 sm:gap-4">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold font-heading text-emerald-400" id="stat-total">0</div>
+                        <div class="text-xs text-indigo-200/70 font-medium">总试题量</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold font-heading text-amber-400" id="stat-calc">0</div>
+                        <div class="text-xs text-indigo-200/70 font-medium">计算推导题</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold font-heading text-cyan-400" id="stat-types">5</div>
+                        <div class="text-xs text-indigo-200/70 font-medium">核心题型</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold font-heading text-indigo-300" id="stat-score">100%</div>
+                        <div class="text-xs text-indigo-200/70 font-medium">包含详细解析</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Filter Controls -->
+        <section class="mb-8 space-y-4">
+            <!-- Search Input -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="search-input" placeholder="搜索题目关键词、公式概念、关键词（如：古诺均衡、HHI、价格歧视、SCP）..." 
+                    class="w-full pl-11 pr-10 py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all placeholder:text-slate-400">
+                <button id="btn-clear-search" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Question Type Tabs -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="type-tabs">
+                <button data-type="all" class="type-tab active-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 shadow-sm bg-indigo-600 text-white">
+                    <i class="fa-solid fa-layer-group mr-1.5"></i>全部题型 (<span id="count-all">0</span>)
+                </button>
+                <button data-type="choice" class="type-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400">
+                    <i class="fa-solid fa-list-check mr-1.5 text-indigo-500"></i>单项选择题 (<span id="count-choice">0</span>)
+                </button>
+                <button data-type="term" class="type-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400">
+                    <i class="fa-solid fa-book mr-1.5 text-emerald-500"></i>名词解释 (<span id="count-term">0</span>)
+                </button>
+                <button data-type="short" class="type-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400">
+                    <i class="fa-solid fa-align-left mr-1.5 text-amber-500"></i>简答题 (<span id="count-short">0</span>)
+                </button>
+                <button data-type="calc" class="type-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400">
+                    <i class="fa-solid fa-calculator mr-1.5 text-cyan-500"></i>计算推导题 (<span id="count-calc">0</span>)
+                </button>
+                <button data-type="essay" class="type-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400">
+                    <i class="fa-solid fa-pen-nib mr-1.5 text-purple-500"></i>综述/论述题 (<span id="count-essay">0</span>)
+                </button>
+            </div>
+        </section>
+
+        <!-- Quiz Progress Banner (quiz mode only) -->
+        <div id="quiz-banner" class="hidden mb-6 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/50 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="text-sm font-bold text-indigo-900 dark:text-indigo-200">
+                    模拟测试模式：答题进度 <span id="quiz-progress" class="text-indigo-600 dark:text-indigo-400">0/0</span>
+                </div>
+                <div class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                    正确率: <span id="quiz-accuracy">100%</span>
+                </div>
+            </div>
+            <button id="btn-reset-quiz" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-all">
+                重置答题记录
+            </button>
+        </div>
+
+        <!-- Questions List Container -->
+        <section id="questions-container" class="space-y-6">
+            <!-- Questions rendered via JS -->
+        </section>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400 text-2xl mb-4">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300">没有找到相关题目</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">尝试更换搜索关键词或选择其他题型选项卡。</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 py-8 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-xs">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold">产业经济学试题库与在线练习系统 · Industrial Economics Question Bank</p>
+            <p>基于 SCP 范式、博弈论、现代产业组织理论与微观规制经济学体系构建</p>
+        </div>
+    </footer>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-heading">
+                    <i class="fa-solid fa-file-export mr-2 text-indigo-500"></i>导出试题 / 试卷
+                </h3>
+                <button id="close-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <button id="export-markdown" class="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between group transition-all text-left">
+                    <div>
+                        <div class="font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">导出 Markdown 格式文档</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">便于放入 Obsidian、Notion 或 Markdown 编辑器编辑</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-indigo-500 transition-transform group-hover:translate-x-1"></i>
+                </button>
+
+                <button id="export-print" class="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between group transition-all text-left">
+                    <div>
+                        <div class="font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">打印 / 导出 PDF 试卷</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">调起浏览器打印对话框，可直接保存为干净无杂质的 PDF</div>
+                    </div>
+                    <i class="fa-solid fa-print text-slate-400 group-hover:text-indigo-500 transition-transform group-hover:translate-x-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="questions-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

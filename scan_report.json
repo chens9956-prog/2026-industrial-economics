@@ -1,0 +1,29 @@
+{
+  "scanned_files_count": 293,
+  "scanned_bytes": 76763948,
+  "junk_list": [
+    {
+      "path": "K:\\我的云端硬盘\\desktop.ini",
+      "size": 246,
+      "reason": "临时/垃圾文件"
+    },
+    {
+      "path": "L:\\我的云端硬盘\\desktop.ini",
+      "size": 246,
+      "reason": "临时/垃圾文件"
+    },
+    {
+      "path": "L:\\我的云端硬盘\\2026产业经济学\\debug.log",
+      "size": 0,
+      "reason": "临时/垃圾文件"
+    }
+  ],
+  "zero_byte_list": [
+    {
+      "path": "L:\\我的云端硬盘\\2026产业经济学\\voxcpm2-voice-cloner\\.venv\\.lock",
+      "size": 0,
+      "reason": "0字节空文件"
+    }
+  ],
+  "duplicate_groups": []
+}

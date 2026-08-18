@@ -1,0 +1,105 @@
+=== 刘志彪《产业经济学 第3版》目录结构 ===
+
+封面 ---> Text/AD_00001.xhtml
+版权信息 ---> Text/AD_00002.xhtml
+前折页 ---> Text/AD_00003.xhtml
+书名页 ---> Text/AD_00004.xhtml
+第3版前言 ---> Text/AD_00005.xhtml#a004
+第2版前言 ---> Text/AD_00006.xhtml#a005
+第1版前言 ---> Text/AD_00007.xhtml#a006
+第一章 企业：目标、结构与组织 ---> Text/AD_00008.xhtml#a008
+第一节 企业的本质 ---> Text/AD_00008.xhtml#b001
+第二节 企业的目标 ---> Text/AD_00008.xhtml#b002
+第三节 企业的结构 ---> Text/AD_00008.xhtml#b003
+第四节 国有企业 ---> Text/AD_00008.xhtml#b004
+本章小结 ---> Text/AD_00008.xhtml#b005
+第二章 不完全竞争市场：理论分析 ---> Text/AD_00009.xhtml#a009
+第一节 不完全竞争市场形态 ---> Text/AD_00009.xhtml#b006
+第二节 垄断市场 ---> Text/AD_00009.xhtml#b007
+第三节 寡头垄断市场 ---> Text/AD_00009.xhtml#b008
+第四节 垄断竞争市场 ---> Text/AD_00009.xhtml#b009
+本章小结 ---> Text/AD_00009.xhtml#b010
+第三章 市场结构与市场势力：实证研究 ---> Text/AD_00010.xhtml#a010
+第一节 市场势力及其福利效应 ---> Text/AD_00010.xhtml#b011
+第二节 市场结构分析 ---> Text/AD_00010.xhtml#b012
+第三节 市场结构与市场势力：计量检验 ---> Text/AD_00010.xhtml#b013
+本章小结 ---> Text/AD_00010.xhtml#b014
+第四章 产品差异化 ---> Text/AD_00011.xhtml#a011
+第一节 产品差异化的定义和类型 ---> Text/AD_00011.xhtml#b015
+第二节 产品差异和市场势力：霍特林模型 ---> Text/AD_00011.xhtml#b016
+第三节 产品定位 ---> Text/AD_00011.xhtml#b017
+第四节 圆形城市模型 ---> Text/AD_00011.xhtml#b018
+第五节 产品差异与垄断竞争 ---> Text/AD_00011.xhtml#b019
+本章小结 ---> Text/AD_00011.xhtml#b020
+第五章 价格歧视 ---> Text/AD_00012.xhtml#a012
+第一节 价格歧视的动机和三个条件 ---> Text/AD_00012.xhtml#b021
+第二节 三级价格歧视 ---> Text/AD_00012.xhtml#b022
+第三节 非线性定价 ---> Text/AD_00012.xhtml#b023
+本章小结 ---> Text/AD_00012.xhtml#b024
+第六章 非价格竞争：广告 ---> Text/AD_00013.xhtml#a013
+第一节 广告对消费者的影响机制 ---> Text/AD_00013.xhtml#b025
+第二节 广告强度 ---> Text/AD_00013.xhtml#b026
+第三节 广告的市场效应 ---> Text/AD_00013.xhtml#b027
+第四节 互联网广告研究 ---> Text/AD_00013.xhtml#b028
+本章小结 ---> Text/AD_00013.xhtml#b029
+第七章 非价格竞争：研发与技术创新 ---> Text/AD_00014.xhtml#a014
+第一节 技术进步的内涵与形式 ---> Text/AD_00014.xhtml#b030
+第二节 市场经济中发明的刺激与阻碍 ---> Text/AD_00014.xhtml#b031
+第三节 市场结构与技术创新之间的联系 ---> Text/AD_00014.xhtml#b032
+第四节 新技术扩散速度的决定机制 ---> Text/AD_00014.xhtml#b033
+本章小结 ---> Text/AD_00014.xhtml#b034
+第八章 非价格竞争：进入和退出 ---> Text/AD_00015.xhtml#a015
+第一节 企业进入与退出：方式与衡量 ---> Text/AD_00015.xhtml#b035
+第二节 促进企业进入和退出的动因 ---> Text/AD_00015.xhtml#b036
+第三节 进入壁垒和退出壁垒 ---> Text/AD_00015.xhtml#b037
+本章小结 ---> Text/AD_00015.xhtml#b038
+第九章 网络与标准竞争 ---> Text/AD_00016.xhtml#a016
+第一节 网络外部性 ---> Text/AD_00016.xhtml#b039
+第二节 标准与兼容性 ---> Text/AD_00016.xhtml#b040
+第三节 公共政策 ---> Text/AD_00016.xhtml#b041
+本章小结 ---> Text/AD_00016.xhtml#b042
+第十章 反垄断：竞争政策与管制政策 ---> Text/AD_00017.xhtml#a017
+第一节 欧美国家的反垄断法 ---> Text/AD_00017.xhtml#b043
+第二节 我国的竞争政策 ---> Text/AD_00017.xhtml#b044
+第三节 管制政策 ---> Text/AD_00017.xhtml#b045
+本章小结 ---> Text/AD_00017.xhtml#b046
+第十一章 产业结构 ---> Text/AD_00018.xhtml#a018
+第一节 产业分类与产业结构 ---> Text/AD_00018.xhtml#b047
+第二节 产业结构分析的基本方法 ---> Text/AD_00018.xhtml#b048
+第三节 产业结构变化的趋势 ---> Text/AD_00018.xhtml#b049
+第四节 产业结构变化的动因 ---> Text/AD_00018.xhtml#b050
+第五节 产业结构变化的增长效应 ---> Text/AD_00018.xhtml#b051
+本章小结 ---> Text/AD_00018.xhtml#b052
+第十二章 现代服务经济 ---> Text/AD_00019.xhtml#a019
+第一节 现代服务业概述 ---> Text/AD_00019.xhtml#b053
+第二节 现代服务业的发展 ---> Text/AD_00019.xhtml#b054
+第三节 现代服务业发展的决定因素与影响 ---> Text/AD_00019.xhtml#b055
+第四节 全球价值链视角下的服务业发展 ---> Text/AD_00019.xhtml#b056
+本章小结 ---> Text/AD_00019.xhtml#b057
+第十三章 产业联系 ---> Text/AD_00020.xhtml#a020
+第一节 产业联系概述 ---> Text/AD_00020.xhtml#b058
+第二节 投入产出法 ---> Text/AD_00020.xhtml#b059
+第三节 产业关联效应分析 ---> Text/AD_00020.xhtml#b060
+第四节 产业波及效应分析 ---> Text/AD_00020.xhtml#b061
+本章小结 ---> Text/AD_00020.xhtml#b062
+第十四章 产业结构政策 ---> Text/AD_00021.xhtml#a021
+第一节 保护幼稚产业 ---> Text/AD_00021.xhtml#b063
+第二节 选择和扶植主导产业 ---> Text/AD_00021.xhtml#b064
+第三节 调整和援助衰退产业 ---> Text/AD_00021.xhtml#b065
+第四节 推动产业链现代化建设 ---> Text/AD_00021.xhtml#b066
+本章小结 ---> Text/AD_00021.xhtml#b067
+第十五章 产业集聚与产业转移 ---> Text/AD_00022.xhtml#a022
+第一节 产业集聚 ---> Text/AD_00022.xhtml#b068
+第二节 产业转移 ---> Text/AD_00022.xhtml#b069
+本章小结 ---> Text/AD_00022.xhtml#b070
+第十六章 经济全球化与产业组织变革 ---> Text/AD_00023.xhtml#a023
+第一节 经济全球化、新国际分工与产业组织变革 ---> Text/AD_00023.xhtml#b071
+第二节 垂直专业化、离岸外包、加工贸易和附加值贸易 ---> Text/AD_00023.xhtml#b072
+第三节 全球价值链与全球生产网络 ---> Text/AD_00023.xhtml#b073
+第四节 发展中国家在全球价值链中的升级与挑战 ---> Text/AD_00023.xhtml#b074
+本章小结 ---> Text/AD_00023.xhtml#b075
+附录 ---> Text/AD_00024.xhtml#a024
+附录A 产业竞争力与产业升级 ---> Text/AD_00024.xhtml#b076
+附录B 企业选址与产业布局 ---> Text/AD_00024.xhtml#b077
+后折页 ---> Text/AD_00025.xhtml
+封底 ---> Text/AD_00026.xhtml

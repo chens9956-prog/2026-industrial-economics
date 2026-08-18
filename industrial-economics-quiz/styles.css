@@ -1,0 +1,81 @@
+/* Custom Styles for Industrial Economics Quiz */
+
+@layer utilities {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .scrollbar-none {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+}
+
+/* Glassmorphism & Subtle Glows */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass-panel {
+    background: rgba(15, 23, 42, 0.75);
+}
+
+/* Card Hover Micro-animations */
+.question-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.question-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Option Button Animations */
+.option-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Print Styles for PDF Export */
+@media print {
+    header, 
+    #type-tabs, 
+    #search-input, 
+    #quiz-banner, 
+    .no-print, 
+    footer,
+    #export-modal {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+    }
+
+    .question-card {
+        break-inside: avoid;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        margin-bottom: 1.5rem !important;
+        background: white !important;
+    }
+
+    .answer-box {
+        display: block !important;
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: black !important;
+    }
+}
+
+/* KaTeX Formula adjustment */
+.katex-display {
+    margin: 0.75em 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.25em 0;
+}
