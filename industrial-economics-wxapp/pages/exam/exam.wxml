@@ -1,0 +1,41 @@
+<view class="container {{themeClass}}">
+  <!-- Sticky Header Bar -->
+  <view class="sticky-header">
+    <view class="info-row">
+      <text class="student-info">考生：{{student.id}} - {{student.name}}</text>
+      <button class="btn-theme-toggle" bindtap="onToggleTheme">🌓 {{themeName}}</button>
+    </view>
+    <view class="action-row">
+      <text class="progress">进度：{{answeredCount}} / 50 题</text>
+      <text class="timer text-amber">剩余时间：{{timerStr}}</text>
+      <button class="btn-exit" bindtap="onExitExam">🚪 退出考试</button>
+    </view>
+  </view>
+
+  <!-- Questions List -->
+  <view class="questions-list">
+    <block wx:for="{{questions}}" wx:key="id" wx:for-index="idx">
+      <view class="card q-card">
+        <view class="q-header">
+          <text class="q-badge">第 {{idx + 1}} 题</text>
+          <text class="q-tag">【{{item.chapter}} · 单选题 · 2分】</text>
+        </view>
+        <text class="q-title">{{item.title}}</text>
+
+        <view class="options-group">
+          <block wx:for="{{item.options}}" wx:for-item="opt" wx:key="key">
+            <view class="opt-item {{userAnswers[item.id] === opt.key ? 'opt-selected' : ''}}" bindtap="onSelectOption" data-qid="{{item.id}}" data-key="{{opt.key}}">
+              <text class="opt-key">{{opt.key}}</text>
+              <text class="opt-text">{{opt.text}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- Submit Button -->
+  <view class="bottom-bar">
+    <button class="btn-submit" bindtap="onSubmitExam">确认交卷并查看成绩 (50题)</button>
+  </view>
+</view>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产业经济学期中在线随堂测试系统 | Online Exam System</title>
+    <meta name="description" content="刘志彪《产业经济学》（第3版）前10章专案考试系统。支持深色与浅色外观切换、得分上下双重展示、50道单选题（每题2分）、75分钟限时答题、2次只读查分机制。">
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-950 dark:bg-slate-950 text-slate-100 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white relative overflow-x-hidden font-sans transition-colors duration-300">
+
+    <!-- Background Decorative Orbs -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-sky-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Navigation Header -->
+    <header class="bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg text-white leading-tight">产业经济学 · 在线随堂考试系统</h1>
+                    <p class="text-xs text-slate-400">教材：刘志彪《产业经济学》（第3版）前10章专案命题</p>
+                </div>
+            </div>
+
+            <!-- Top Header Actions: Theme Switcher & Admin Button -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Switcher Button -->
+                <button type="button" id="btn-toggle-theme" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-moon text-sky-400" id="theme-icon"></i>
+                    <span id="theme-text">深色模式</span>
+                </button>
+
+                <a href="admin.html" class="text-xs font-bold px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-400/40 transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-lock"></i> 教师管理端
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Views Container -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-1 flex flex-col justify-center relative z-10">
+
+        <!-- VIEW 1: STUDENT LOGIN CARD -->
+        <section id="view-login" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-6">
+            <div class="text-center space-y-2">
+                <span class="inline-block px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs font-bold uppercase tracking-wider">期中考试身份匹配登录</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">请输入您的学号与姓名</h2>
+                <p class="text-sm text-slate-400">系统将核对您输入的学号与姓名是否与允许考试名单精准匹配</p>
+            </div>
+
+            <form id="form-login" class="space-y-4 max-w-md mx-auto pt-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5" for="input-student-id">
+                        <i class="fa-solid fa-id-card text-sky-400 mr-1.5"></i>学号 (Student ID)
+                    </label>
+                    <input type="text" id="input-student-id" required placeholder="例如：2026010001" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-mono text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5" for="input-student-name">
+                        <i class="fa-solid fa-user text-sky-400 mr-1.5"></i>姓名 (Full Name)
+                    </label>
+                    <input type="text" id="input-student-name" required placeholder="例如：高建刚" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all text-sm">
+                </div>
+
+                <!-- Error Message Alert Banner -->
+                <div id="login-error-msg" class="hidden p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-rose-400 text-sm"></i>
+                    <span id="login-error-text">学号与姓名不匹配，请重新核对。</span>
+                </div>
+
+                <!-- Already Submitted & 2-Time Limit Reached Banner Alert -->
+                <div id="already-submitted-msg" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-xs space-y-2">
+                    <div class="font-bold text-sm text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-lock text-base"></i>
+                        <span>查分次数已达到上限（已使用 2 次查分机会）！</span>
+                    </div>
+                    <p id="already-submitted-detail" class="text-slate-300 leading-relaxed">
+                        您的测试记录已提交且已完成 2 次查分。为了保证考试公平性，无法再次查分或修改答案。
+                    </p>
+                    <div class="pt-1 text-slate-400 font-mono text-[11px] flex items-center justify-between border-t border-amber-500/20">
+                        <span>系统关闭倒计时：</span>
+                        <span class="font-bold text-amber-400 text-sm"><span id="close-countdown-timer">15</span> 秒后自动关闭</span>
+                    </div>
+                </div>
+
+                <!-- Exam Notice Box -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 text-xs text-slate-400 space-y-1.5">
+                    <p class="font-bold text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i>期中随堂考试须知：</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-300 pl-1">
+                        <li>题量及分值：共 <strong class="text-sky-400 font-mono">50 道单项选择题</strong>（全卷满分 100 分，每题 2 分）。</li>
+                        <li>考试时长：答题时长为 <strong class="text-amber-300 font-mono">75 分钟</strong>，支持中途<strong class="text-slate-300">【退出考试】</strong>。</li>
+                        <li>成绩展示：得分与正确率在页面<strong class="text-emerald-400">顶部与底部双重展示</strong>。</li>
+                        <li>查分限制：提交后最多允许 2 次只读查分（每次15秒自动关闭）。</li>
+                    </ul>
+                </div>
+
+                <button type="submit" id="btn-login-submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-base shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    验证身份并开始测试 (50题/75分钟) <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="text-center pt-2 border-t border-slate-800/60">
+                <a href="admin.html" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold underline">
+                    <i class="fa-solid fa-user-shield mr-1"></i>我是教师/管理员？点击此处进入教师管理端
+                </a>
+            </div>
+        </section>
+
+        <!-- VIEW 2: EXAM QUESTIONNAIRE CARD (WITH EXIT BUTTON) -->
+        <section id="view-exam" class="hidden space-y-6">
+            <!-- Exam Info Header & Sticky Timer & Exit Button -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 flex items-center justify-between sticky top-16 z-30 shadow-xl backdrop-blur-xl gap-3 flex-wrap sm:flex-nowrap">
+                <div>
+                    <div class="text-xs text-slate-400">考生：<span id="exam-student-info" class="font-bold text-sky-400">2026010001 - 高建刚</span></div>
+                    <div class="text-sm font-bold text-white flex items-center gap-2">
+                        答题进度：<span id="exam-progress-text" class="font-mono text-sky-400">0 / 50</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- Timer -->
+                    <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl">
+                        <i class="fa-solid fa-stopwatch text-amber-400 animate-pulse"></i>
+                        <span class="text-xs text-slate-400">剩余时间：</span>
+                        <span id="exam-timer" class="font-mono font-bold text-base text-amber-400">75:00</span>
+                    </div>
+
+                    <!-- Exit / Quit Exam Button -->
+                    <button type="button" id="btn-exit-exam" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> 退出考试
+                    </button>
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questions-container" class="space-y-6">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- Action Buttons at bottom -->
+            <div class="pt-4 flex items-center justify-between gap-4">
+                <button type="button" id="btn-exit-exam-bottom" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm border border-slate-700 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left"></i> 暂不作答，退出考试
+                </button>
+
+                <button type="button" id="btn-submit-exam" class="px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base shadow-lg shadow-emerald-600/25 active:scale-95 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> 确认交卷并查看成绩 (50题)
+                </button>
+            </div>
+        </section>
+
+        <!-- VIEW 3: STUDENT RESULT CARD (SCORE AT TOP AND BOTTOM DUAL DISPLAY) -->
+        <section id="view-result" class="hidden bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8">
+            
+            <!-- Result Header Banner -->
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">测试已完成！</h2>
+                <p id="result-status-tag" class="text-xs text-slate-400">考案结果已成功保存并同步给教师后台</p>
+            </div>
+
+            <!-- 2-Time Read-Only Query 15s Auto-Close Banner Notice -->
+            <div id="one-time-check-notice" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-xs space-y-2">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div class="font-bold text-sm text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-base"></i>
+                        <span id="query-chance-badge">【查分模式 · 只读不可修改答案】</span>
+                    </div>
+                    <div class="font-mono text-xs bg-amber-500/20 px-3 py-1 rounded-xl text-amber-300 border border-amber-500/30">
+                        倒计时 <strong id="query-countdown-timer" class="text-amber-400 font-bold text-sm">15</strong> 秒后自动关闭系统
+                    </div>
+                </div>
+                <p class="text-slate-300 leading-relaxed text-[11px]">
+                    为了保证考试公平性，提交后最多提供 <strong>2 次查分机会</strong>（每次查分自动限制 15 秒）。倒计时归零后页面将自动锁定关闭。
+                </p>
+            </div>
+
+            <!-- NEW: 1. TOP SCORE DISPLAY CARD (顶部得分卡片) -->
+            <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-sky-500/40 rounded-3xl p-6 max-w-md mx-auto grid grid-cols-2 gap-4 divide-x divide-slate-800 shadow-2xl shadow-sky-500/10">
+                <div class="space-y-1 text-center">
+                    <div class="text-xs text-slate-400 font-semibold">您的最终得分</div>
+                    <div id="result-score-top" class="font-mono font-extrabold text-4xl sm:text-5xl text-sky-400">0</div>
+                    <div class="text-[11px] text-slate-500">满分 100 分 (50题*2分)</div>
+                </div>
+                <div class="space-y-1 text-center pl-4">
+                    <div class="text-xs text-slate-400 font-semibold">用时与正确率</div>
+                    <div id="result-accuracy-top" class="font-mono font-extrabold text-2xl text-emerald-400">0%</div>
+                    <div id="result-duration-top" class="text-xs font-mono text-slate-300">用时 00:00</div>
+                </div>
+            </div>
+
+            <!-- Detailed Questions & Answers Breakdown -->
+            <div class="space-y-4 text-left max-w-2xl mx-auto pt-2">
+                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <i class="fa-solid fa-list-check text-sky-400"></i>50道试题答题明细与参考解析 (每题2分)
+                </h3>
+                <div id="result-details-container" class="space-y-4">
+                    <!-- Injected via JavaScript -->
+                </div>
+            </div>
+
+            <!-- 2. BOTTOM SCORE DISPLAY CARD (底部得分卡片) -->
+            <div class="pt-6 border-t border-slate-800">
+                <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-sky-500/40 rounded-3xl p-6 max-w-md mx-auto grid grid-cols-2 gap-4 divide-x divide-slate-800 shadow-2xl shadow-sky-500/10">
+                    <div class="space-y-1 text-center">
+                        <div class="text-xs text-slate-400 font-semibold">您的最终得分</div>
+                        <div id="result-score" class="font-mono font-extrabold text-4xl sm:text-5xl text-sky-400">0</div>
+                        <div class="text-[11px] text-slate-500">满分 100 分 (50题*2分)</div>
+                    </div>
+                    <div class="space-y-1 text-center pl-4">
+                        <div class="text-xs text-slate-400 font-semibold">用时与正确率</div>
+                        <div id="result-accuracy" class="font-mono font-extrabold text-2xl text-emerald-400">0%</div>
+                        <div id="result-duration" class="text-xs font-mono text-slate-300">用时 00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 text-center">
+                <button type="button" id="btn-restart-student" class="px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm border border-slate-700 transition-all">
+                    返回登录主页
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Direct Hyperlink -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 flex items-center justify-between max-w-6xl mx-auto px-4 w-full">
+        <p>© 2026 产业经济学课程测试系统 · 刘志彪《产业经济学》（第3版）前10章专案考场</p>
+        <a href="admin.html" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+            <i class="fa-solid fa-lock text-xs"></i> 教师管理端
+        </a>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>

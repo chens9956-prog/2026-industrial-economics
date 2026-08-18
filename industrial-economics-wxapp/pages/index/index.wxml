@@ -1,0 +1,38 @@
+<view class="container {{themeClass}}">
+  <view class="card shadow">
+    <view class="top-row">
+      <view class="header-tag">学籍匹配身份验证</view>
+      <button class="btn-theme-toggle" bindtap="onToggleTheme">🌓 {{themeName}}</button>
+    </view>
+    <view class="title">产业经济学 · 在线随堂考试</view>
+    <view class="subtitle">教材：刘志彪《产业经济学》（第3版）前10章</view>
+
+    <view class="form-group">
+      <text class="label">学号 (Student ID)</text>
+      <input class="input" placeholder="例如：2026010001" bindinput="onInputId" value="{{studentId}}" />
+    </view>
+
+    <view class="form-group">
+      <text class="label">姓名 (Full Name)</text>
+      <input class="input" placeholder="例如：高建刚" bindinput="onInputName" value="{{studentName}}" />
+    </view>
+
+    <view class="error-banner" wx:if="{{errorMsg}}">
+      <text class="error-text">{{errorMsg}}</text>
+    </view>
+
+    <view class="notice-box">
+      <text class="notice-title">⚠️ 期中考试须知：</text>
+      <text class="notice-item">• 题量及分值：50 道单项选择题（每题2分，满分100分）。</text>
+      <text class="notice-item">• 考试时长：75 分钟限时答题，支持中途【退出考试】。</text>
+      <text class="notice-item">• 成绩展示：得分与正确率在页面【顶部与底部双重展示】。</text>
+      <text class="notice-item">• 查分限制：提交后最多允许 2 次查分（每次15秒后自动关闭）。</text>
+    </view>
+
+    <button class="btn-primary" bindtap="onStartExam">验证身份并开始测试 (50题/75分钟)</button>
+  </view>
+
+  <view class="footer-link" bindtap="onNavAdmin">
+    <text class="link-text">🔒 教师/管理员控制台入口</text>
+  </view>
+</view>

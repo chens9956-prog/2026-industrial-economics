@@ -3,14 +3,14 @@
 > 本档为跨 Agent 通用的专案蓝图（AGENTS.md 开放标准）。任何 Agent 的每个 session 都应先读本档＋`handoff.md`。
 
 ## 专案简介
-本专案为“2026产业经济学”相关的课程建设与教学资料整理，包含教学大纲、课件讲义、核心参考指南及考研题库，同时包含随堂测试系统等衍生教学工具。
+本专案为“2026产业经济学”相关的课程建设与教学资料整理，包含教学大纲、课件讲义、核心参考指南及考研题库，同时包含随堂测试系统与萌宠科学计算器等衍生教学工具。
 
 ## 关键时程
 - (暂无关键时程，有需要时可补充)
 
 ## 目标与路线图
-- [ ] 阶段一：梳理并完善各章节教学资料与课件
-- [ ] 阶段二：集成随堂测试系统与相关线上教学工具
+- [x] 阶段一：梳理并完善各章节教学资料与课件 (已完成1-10章单页PDF要点与第1章4层级结构课件试做)
+- [x] 阶段二：集成随堂测试系统（50题/75分钟/上下双得分卡/深浅色主题/Netlify部署+原生微信小程序版）与企鹅萌宠科学计算器小程序
 
 ## 资料夹结构
 ```text
@@ -20,16 +20,18 @@
 ├── 03_经典教材与核心参考指南_DOCX/
 ├── 04_产业经济学学术档案_PDF/
 ├── 05_历年考研与学术考核题库_DOCX/
-├── clasp-netlify-mcp-guide/      # 部署与配置指南
+├── clasp-netlify-mcp-guide/          # 部署与配置指南
 ├── gem-to-agent-kit/
-├── glass-calculator/             # 计算工具
-├── industrial-economics-quiz/    # 随堂测试系统相关
-├── online-exam-system/           # 线上考试系统相关
+├── glass-calculator/                 # 高颜值科学计算器 Web 版
+├── glass-calculator-wxapp/           # 企鹅萌宠科学计算器原生微信小程序包
+├── industrial-economics-quiz/        # 随堂测试系统相关
+├── industrial-economics-wxapp/       # 产业经济学随堂测试系统原生微信小程序包
+├── online-exam-system/               # 在线随堂考试系统 Web 版（Netlify部署）
 ├── padlet-mcp/
-├── voxcpm2-voice-cloner/         # 语音克隆工具
-├── handoff.md                    # 交接状态文件
-├── fetch_md.py                   # 抓取 YouTube 字幕脚本
-├── json_to_md_robust.py          # 强健版 JSON 转 Markdown 字幕处理脚本
+├── voxcpm2-voice-cloner/             # 语音克隆工具
+├── handoff.md                        # 交接状态文件
+├── fetch_md.py                       # 抓取 YouTube 字幕脚本
+├── json_to_md_robust.py              # 强健版 JSON 转 Markdown 字幕处理脚本
 └── ... (各类课件 pptx 及文档资料)
 ```
 

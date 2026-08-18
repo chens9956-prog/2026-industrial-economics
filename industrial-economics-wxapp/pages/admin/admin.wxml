@@ -1,0 +1,48 @@
+<view class="container">
+  <view class="card" wx:if="{{!isUnlocked}}">
+    <text class="title text-center">🔒 教师控制台身份登录</text>
+    <view class="form-group pt-4">
+      <text class="label">管理员密码</text>
+      <input class="input" password placeholder="请输入管理员密码" bindinput="onInputPass" value="{{passVal}}" />
+    </view>
+    <view class="error-banner" wx:if="{{passError}}">
+      <text class="error-text">密码错误，请重新输入！</text>
+    </view>
+    <button class="btn-primary" bindtap="onAdminLogin">登录教师控制台</button>
+  </view>
+
+  <view class="card" wx:else>
+    <text class="title">👩‍🏫 教师管理面板</text>
+
+    <!-- Tab Buttons -->
+    <view class="tab-bar">
+      <button class="tab-btn {{activeTab === 'scores' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="scores">全班成绩单</button>
+      <button class="tab-btn {{activeTab === 'roster' ? 'tab-active' : ''}}" bindtap="onSwitchTab" data-tab="roster">学籍名单管理</button>
+    </view>
+
+    <!-- Tab 1: Scores -->
+    <view class="tab-content" wx:if="{{activeTab === 'scores'}}">
+      <text class="sub-title">已收集到 {{records.length}} 条记录</text>
+      <block wx:for="{{records}}" wx:key="id">
+        <view class="record-card">
+          <view class="r-head">
+            <text class="r-name">{{item.id}} - {{item.name}}</text>
+            <text class="r-score {{item.score >= 60 ? 'text-green' : 'text-red'}}">{{item.score}}分</text>
+          </view>
+          <view class="r-body">
+            <text class="r-info">正确率: {{item.accuracy}} | 用时: {{item.duration}}</text>
+            <text class="r-time">{{item.timestamp}}</text>
+          </view>
+        </view>
+      </block>
+      <button class="btn-danger" bindtap="onClearRecords">清空所有成绩记录</button>
+    </view>
+
+    <!-- Tab 2: Roster -->
+    <view class="tab-content" wx:if="{{activeTab === 'roster'}}">
+      <text class="sub-title">编辑学籍白名单 (格式：学号,姓名 每行一条)：</text>
+      <textarea class="textarea" value="{{rosterText}}" bindinput="onInputRosterText" rows="6" />
+      <button class="btn-primary btn-save" bindtap="onSaveRoster">保存白名单</button>
+    </view>
+  </view>
+</view>

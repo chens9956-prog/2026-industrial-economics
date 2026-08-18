@@ -1,0 +1,123 @@
+<view class="container {{skinMode}}">
+
+  <!-- CUTE ANIMAL DECORATION -->
+  <view class="cute-ears-wrapper" wx:if="{{skinMode === 'skin-penguin'}}">
+    <view class="penguin-ear left-ear"><view class="inner-ear"></view></view>
+    <view class="penguin-beak">🐧</view>
+    <view class="penguin-ear right-ear"><view class="inner-ear"></view></view>
+  </view>
+
+  <view class="cute-ears-wrapper" wx:if="{{skinMode === 'skin-bear'}}">
+    <view class="bear-ear left-ear"></view>
+    <view class="bear-face">🐻</view>
+    <view class="bear-ear right-ear"></view>
+  </view>
+
+  <!-- CALCULATOR MAIN CARD -->
+  <view class="calc-card">
+
+    <!-- Skin Switcher Header Controls -->
+    <view class="calc-header">
+      <view class="title-box">
+        <image class="app-logo-icon" src="/icon.png" mode="aspectFit" />
+        <text class="title">{{skinTitle}}</text>
+      </view>
+
+      <!-- Skin Selector Menu Buttons -->
+      <view class="skin-selector">
+        <view class="skin-btn {{skinMode === 'skin-penguin' ? 'active' : ''}}" bindtap="onSelectSkin" data-skin="skin-penguin">🐧企鹅</view>
+        <view class="skin-btn {{skinMode === 'skin-bear' ? 'active' : ''}}" bindtap="onSelectSkin" data-skin="skin-bear">🐻小熊</view>
+        <view class="skin-btn {{skinMode === 'skin-aurora' ? 'active' : ''}}" bindtap="onSelectSkin" data-skin="skin-aurora">🌌赛博</view>
+        <view class="skin-btn history-btn" bindtap="onToggleHistory">📜历史</view>
+      </view>
+    </view>
+
+    <!-- Display Screen -->
+    <view class="calc-display">
+      <scroll-view scroll-x class="expr-scroll">
+        <text class="expression">{{subDisplay}}</text>
+      </scroll-view>
+      <text class="main-screen">{{mainDisplay}}</text>
+    </view>
+
+    <!-- Function Mode Tabs + DEG/RAD Switcher -->
+    <view class="mode-tabs">
+      <view class="tab-left">
+        <text class="tab-item {{isSciMode ? 'active' : ''}}" bindtap="onToggleSciMode">高阶函数</text>
+        <text class="tab-item {{!isSciMode ? 'active' : ''}}" bindtap="onToggleSciMode">基础计算</text>
+      </view>
+      <view class="tab-right">
+        <text class="angle-btn" bindtap="onToggleAngleMode">{{angleMode === 'DEG' ? '📐 角度(DEG)' : '🌐 弧度(RAD)'}}</text>
+      </view>
+    </view>
+
+    <!-- Scientific Function Keys Row (5 Keys) -->
+    <view class="keypad-sci" wx:if="{{isSciMode}}">
+      <view class="btn-key sci" hover-class="btn-hover" bindtap="onTapKey" data-val="sin(">sin</view>
+      <view class="btn-key sci" hover-class="btn-hover" bindtap="onTapKey" data-val="cos(">cos</view>
+      <view class="btn-key sci" hover-class="btn-hover" bindtap="onTapKey" data-val="tan(">tan</view>
+      <view class="btn-key sci" hover-class="btn-hover" bindtap="onTapKey" data-val="ln(">ln</view>
+      <view class="btn-key sci" hover-class="btn-hover" bindtap="onTapKey" data-val="log(">log</view>
+    </view>
+
+    <!-- Main Grid Layout (5 Columns x 5 Rows) -->
+    <view class="keypad-grid">
+      <!-- Row 1: AC, ⌫ 撤销, (, ), ÷ -->
+      <view class="btn-key func-clear" hover-class="btn-hover" bindtap="onClear">AC</view>
+      <view class="btn-key func-del" hover-class="btn-hover" bindtap="onDelete">⌫ 撤销</view>
+      <view class="btn-key func" hover-class="btn-hover" bindtap="onTapKey" data-val="(">(</view>
+      <view class="btn-key func" hover-class="btn-hover" bindtap="onTapKey" data-val=")">)</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="÷">÷</view>
+
+      <!-- Row 2: 7, 8, 9, %, × -->
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="7">7</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="8">8</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="9">9</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="%">%</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="×">×</view>
+
+      <!-- Row 3: 4, 5, 6, ^, - -->
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="4">4</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="5">5</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="6">6</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="^">x^y</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="-">-</view>
+
+      <!-- Row 4: 1, 2, 3, √, + -->
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="1">1</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="2">2</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val="3">3</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="√(">√</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="+">+</view>
+
+      <!-- Row 5: 0 (span 2), ., π, = -->
+      <view class="btn-key num span-2" hover-class="btn-hover" bindtap="onTapKey" data-val="0">0</view>
+      <view class="btn-key num" hover-class="btn-hover" bindtap="onTapKey" data-val=".">.</view>
+      <view class="btn-key op" hover-class="btn-hover" bindtap="onTapKey" data-val="π">π</view>
+      <view class="btn-key btn-equal" hover-class="btn-hover" bindtap="onCalculate">=</view>
+    </view>
+  </view>
+
+  <!-- History Drawer Panel -->
+  <view class="history-panel" wx:if="{{showHistory}}">
+    <view class="panel-header">
+      <text class="panel-title">📜 计算历史记录</text>
+      <view class="panel-btns">
+        <text class="btn-text-danger" bindtap="onClearHistory">清空历史</text>
+        <text class="btn-text-close" bindtap="onToggleHistory">关闭</text>
+      </view>
+    </view>
+
+    <scroll-view scroll-y class="history-list">
+      <block wx:for="{{historyList}}" wx:key="index">
+        <view class="history-item" bindtap="onSelectHistory" data-item="{{item}}">
+          <text class="h-expr">{{item.expr}}</text>
+          <text class="h-res">= {{item.res}}</text>
+        </view>
+      </block>
+      <view class="empty-tip" wx:if="{{historyList.length === 0}}">
+        <text>暂无历史计算记录</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>
