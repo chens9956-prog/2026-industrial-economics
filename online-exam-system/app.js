@@ -1620,6 +1620,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- KaTeX Math Auto-Render Helper ---
     const triggerMathRender = () => {
+          if (!window.renderMathInElement) { setTimeout(triggerMathRender, 500); return; }
+
         if (window.renderMathInElement) {
             try {
                 window.renderMathInElement(document.body, {
