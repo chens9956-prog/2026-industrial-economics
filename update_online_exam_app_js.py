@@ -3,7 +3,7 @@ import json
 with open(r'l:\我的云端硬盘\2026产业经济学\online-exam-system\questions_data.json', 'r', encoding='utf-8') as f:
     questions_json = f.read()
 
-app_js_template = """// Online Exam System JavaScript Logic (60 Questions: 40 Single Choice @ 1.5 pts + 20 Multiple Choice @ 2.0 pts = 100 pts)
+app_js_template = """// Online Exam System JavaScript Logic with KaTeX Math Formula Support
 
 const cleanStr = (str) => (str || '').toString().trim().replace(/[\\s\\uFEFF\\xA0]+/g, '');
 
@@ -62,6 +62,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const readOnlyQueryAlert = document.getElementById('read-only-query-alert');
     const readOnlyCountdown = document.getElementById('read-only-countdown');
 
+    // --- KaTeX Math Auto-Render Helper ---
+    const triggerMathRender = () => {
+        if (window.renderMathInElement) {
+            try {
+                window.renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\\\(', right: '\\\\)', display: false},
+                        {left: '\\\\[', right: '\\\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            } catch (err) {
+                console.warn('KaTeX render warning:', err);
+            }
+        }
+    };
+
     // --- Theme Switcher ---
     const applyTheme = (theme) => {
         if (theme === 'light') {
@@ -79,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-sky-400';
             if (themeText) themeText.textContent = '深色模式';
         }
+        setTimeout(triggerMathRender, 50);
     };
 
     const savedTheme = localStorage.getItem('theme_mode') || 'dark';
@@ -210,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
 
-                    <h3 class="text-base sm:text-lg font-bold text-white leading-relaxed">
+                    <h3 class="text-base sm:text-lg font-bold text-white leading-relaxed math-content">
                         ${q.title}
                     </h3>
 
@@ -221,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold font-mono text-xs flex items-center justify-center border border-slate-700 option-badge">
                                     ${opt.key}
                                 </span>
-                                <span>${opt.text}</span>
+                                <span class="math-content">${opt.text}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -236,20 +256,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const key = optionEl.getAttribute('data-key');
 
                 if (qtype === 'single') {
-                    // Single choice: exclusive select
                     userAnswers[qid] = key;
-
                     const siblingOptions = document.querySelectorAll(`.quiz-option[data-qid="${qid}"]`);
                     siblingOptions.forEach(opt => {
                         opt.classList.remove('selected');
                         opt.querySelector('.option-badge').classList.remove('bg-sky-500', 'text-white', 'border-sky-400');
                     });
-
                     optionEl.classList.add('selected');
                     optionEl.querySelector('.option-badge').classList.add('bg-sky-500', 'text-white', 'border-sky-400');
-
                 } else {
-                    // Multiple choice: toggle selection
                     let currentAns = userAnswers[qid] ? userAnswers[qid].split('') : [];
                     if (currentAns.includes(key)) {
                         currentAns = currentAns.filter(k => k !== key);
@@ -261,12 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         optionEl.classList.add('selected');
                         optionEl.querySelector('.option-badge').classList.add('bg-indigo-500', 'text-white', 'border-indigo-400');
                     }
-
-                    if (currentAns.length > 0) {
-                        userAnswers[qid] = currentAns.join('');
-                    } else {
-                        delete userAnswers[qid];
-                    }
+                    if (currentAns.length > 0) userAnswers[qid] = currentAns.join('');
+                    else delete userAnswers[qid];
                 }
 
                 const answeredCount = Object.keys(userAnswers).length;
@@ -275,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         examProgressText.textContent = `0 / ${questionBank.length}`;
+        setTimeout(triggerMathRender, 50);
     };
 
     // --- Timer Logic (75 mins = 4500 secs) ---
@@ -338,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     correctCount++;
                 }
             } else {
-                // Multiple choice: exact match
                 if (userAns.split('').sort().join('') === correctAns.split('').sort().join('')) {
                     totalScore += 2.0;
                     correctCount++;
@@ -346,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Round score to 1 decimal place if needed
         totalScore = Math.round(totalScore * 10) / 10;
         const accuracy = Math.round((correctCount / questionBank.length) * 100);
         const durationMin = Math.floor(timeElapsed / 60);
@@ -426,12 +436,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         <div class="flex items-center gap-2">
                             <span class="px-2.5 py-1 rounded-xl text-xs font-bold font-mono ${isCorrect ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
-                                ${isCorrect ? '✓ 正确 (' + (isMulti ? '2分' : '1.5分') + ')' : '✗ 错误 (0分)'}
+                                ${isCorrect ? '✓ 正确 (' + (isMulti ? '2分' : '1.5分') + ')' : '✕ 回答错误 (0分)'}
                             </span>
                         </div>
                     </div>
 
-                    <h4 class="text-sm font-bold text-white leading-relaxed">${q.title}</h4>
+                    <h4 class="text-sm font-bold text-white leading-relaxed math-content">${q.title}</h4>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono pt-1">
                         <div class="p-3 rounded-xl ${isCorrect ? 'bg-emerald-950/40 border border-emerald-800/60 text-emerald-300' : 'bg-rose-950/40 border border-rose-800/60 text-rose-300'}">
@@ -442,13 +452,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
 
-                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed math-content">
                         <strong class="text-sky-400 block mb-1">权威解析：</strong>
                         ${q.explanation}
                     </div>
                 </div>
             `;
         }).join('');
+
+        setTimeout(triggerMathRender, 50);
     };
 
     btnRestartStudent.addEventListener('click', () => {
@@ -463,4 +475,4 @@ app_js_code = app_js_template.replace("REPLACE_QUESTIONS_JSON", questions_json)
 with open(r'l:\我的云端硬盘\2026产业经济学\online-exam-system\app.js', 'w', encoding='utf-8') as f:
     f.write(app_js_code)
 
-print("Updated online-exam-system/app.js with 60 questions and single/multiple scoring logic successfully!")
+print("Updated online-exam-system/app.js with KaTeX auto-render support successfully!")
