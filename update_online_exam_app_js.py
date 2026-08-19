@@ -3,7 +3,7 @@ import json
 with open(r'l:\我的云端硬盘\2026产业经济学\online-exam-system\questions_data.json', 'r', encoding='utf-8') as f:
     questions_json = f.read()
 
-app_js_template = """// Online Exam System JavaScript Logic with KaTeX Math Formula Support
+app_js_template = """// Online Exam System JavaScript Logic
 
 const cleanStr = (str) => (str || '').toString().trim().replace(/[\\s\\uFEFF\\xA0]+/g, '');
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-sky-400';
             if (themeText) themeText.textContent = '深色模式';
         }
-        setTimeout(triggerMathRender, 50);
+        
     };
 
     const savedTheme = localStorage.getItem('theme_mode') || 'dark';
@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         examProgressText.textContent = `0 / ${questionBank.length}`;
-        setTimeout(triggerMathRender, 50);
+        
     };
 
     // --- Timer Logic (75 mins = 4500 secs) ---
@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
-        setTimeout(triggerMathRender, 50);
+        
     };
 
     btnRestartStudent.addEventListener('click', () => {
