@@ -6,7 +6,7 @@
       <button class="btn-theme-toggle" bindtap="onToggleTheme">🌓 {{themeName}}</button>
     </view>
     <view class="action-row">
-      <text class="progress">进度：{{answeredCount}} / 50 题</text>
+      <text class="progress">进度：{{answeredCount}} / 60 题</text>
       <text class="timer text-amber">剩余时间：{{timerStr}}</text>
       <button class="btn-exit" bindtap="onExitExam">🚪 退出考试</button>
     </view>
@@ -17,15 +17,15 @@
     <block wx:for="{{questions}}" wx:key="id" wx:for-index="idx">
       <view class="card q-card">
         <view class="q-header">
-          <text class="q-badge">第 {{idx + 1}} 题</text>
-          <text class="q-tag">【{{item.chapter}} · 单选题 · 2分】</text>
+          <text class="q-badge {{item.type === 'multiple' ? 'badge-multi' : ''}}">第 {{idx + 1}} 题</text>
+          <text class="q-tag">【{{item.chapter}} · {{item.type === 'multiple' ? '多选题 · 2分' : '单选题 · 1.5分'}}】</text>
         </view>
         <text class="q-title">{{item.title}}</text>
 
         <view class="options-group">
           <block wx:for="{{item.options}}" wx:for-item="opt" wx:key="key">
-            <view class="opt-item {{userAnswers[item.id] === opt.key ? 'opt-selected' : ''}}" bindtap="onSelectOption" data-qid="{{item.id}}" data-key="{{opt.key}}">
-              <text class="opt-key">{{opt.key}}</text>
+            <view class="opt-item {{item.type === 'multiple' ? (selectedMap[item.id + '_' + opt.key] ? 'opt-selected-multi' : '') : (userAnswers[item.id] === opt.key ? 'opt-selected' : '')}}" bindtap="onSelectOption" data-qid="{{item.id}}" data-type="{{item.type}}" data-key="{{opt.key}}">
+              <text class="opt-key {{item.type === 'multiple' ? 'key-multi' : ''}}">{{opt.key}}</text>
               <text class="opt-text">{{opt.text}}</text>
             </view>
           </block>
@@ -36,6 +36,6 @@
 
   <!-- Submit Button -->
   <view class="bottom-bar">
-    <button class="btn-submit" bindtap="onSubmitExam">确认交卷并查看成绩 (50题)</button>
+    <button class="btn-submit" bindtap="onSubmitExam">确认交卷并查看成绩 (60题)</button>
   </view>
 </view>

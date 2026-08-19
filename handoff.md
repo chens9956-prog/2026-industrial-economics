@@ -29,4 +29,4 @@
 ## 🕐 最后更新
 - **时间**：2026-08-18 17:20
 - **更新者**：Antigravity @ ausu
-- **Git Push 状态**：✅ 已推
+- **Git Push 状态**：❌ 未推（Git Push 超时，因包含大量且体积庞大的 PPTX 与 PDF 档案，建议使用者手动 `git push`）

@@ -1,4 +1,8 @@
-<view class="container {{themeClass}}">
+import os
+
+base_dir = r'l:\我的云端硬盘\2026产业经济学\industrial-economics-wxapp'
+
+result_wxml = """<view class="container {{themeClass}}">
   <view class="card">
     <view class="top-row font-mono">
       <button class="btn-theme-toggle" bindtap="onToggleTheme">🌓 {{themeName}}</button>
@@ -64,3 +68,9 @@
     <button class="btn-home" bindtap="onBackHome">返回考场登录首页</button>
   </view>
 </view>
+"""
+
+with open(os.path.join(base_dir, 'pages', 'result', 'result.wxml'), 'w', encoding='utf-8') as f:
+    f.write(result_wxml)
+
+print("Updated result.wxml successfully!")

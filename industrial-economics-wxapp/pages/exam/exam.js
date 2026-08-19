@@ -5,6 +5,7 @@ Page({
     student: { id: '', name: '' },
     questions: questions,
     userAnswers: {},
+    selectedMap: {},
     answeredCount: 0,
     timeRemaining: 75 * 60,
     timerStr: '75:00',
@@ -72,10 +73,31 @@ Page({
   },
 
   onSelectOption(e) {
-    const { qid, key } = e.currentTarget.dataset;
-    const userAnswers = { ...this.data.userAnswers, [qid]: key };
+    const { qid, type, key } = e.currentTarget.dataset;
+    let userAnswers = { ...this.data.userAnswers };
+    let selectedMap = { ...this.data.selectedMap };
+
+    if (type === 'single') {
+      userAnswers[qid] = key;
+    } else {
+      // Multiple choice toggle
+      const mapKey = qid + '_' + key;
+      selectedMap[mapKey] = !selectedMap[mapKey];
+
+      let currentKeys = [];
+      ['A', 'B', 'C', 'D'].forEach(k => {
+        if (selectedMap[qid + '_' + k]) currentKeys.push(k);
+      });
+
+      if (currentKeys.length > 0) {
+        userAnswers[qid] = currentKeys.join('');
+      } else {
+        delete userAnswers[qid];
+      }
+    }
+
     const answeredCount = Object.keys(userAnswers).length;
-    this.setData({ userAnswers, answeredCount });
+    this.setData({ userAnswers, selectedMap, answeredCount });
   },
 
   onExitExam() {
@@ -109,12 +131,27 @@ Page({
   submitExam() {
     if (this.timerInterval) clearInterval(this.timerInterval);
 
+    let totalScore = 0;
     let correctCount = 0;
+
     this.data.questions.forEach(q => {
-      if (this.data.userAnswers[q.id] === q.answer) correctCount++;
+      const uAns = this.data.userAnswers[q.id] || '';
+      const cAns = q.answer;
+
+      if (q.type === 'single') {
+        if (uAns === cAns) {
+          totalScore += 1.5;
+          correctCount++;
+        }
+      } else {
+        if (uAns.split('').sort().join('') === cAns.split('').sort().join('')) {
+          totalScore += 2.0;
+          correctCount++;
+        }
+      }
     });
 
-    const score = correctCount * 2;
+    totalScore = Math.round(totalScore * 10) / 10;
     const accuracy = Math.round((correctCount / this.data.questions.length) * 100) + '%';
     const durationMin = Math.floor(this.timeElapsed / 60);
     const durationSec = this.timeElapsed % 60;
@@ -123,7 +160,7 @@ Page({
     const record = {
       id: this.data.student.id,
       name: this.data.student.name,
-      score,
+      score: totalScore,
       accuracy,
       duration,
       userAnswers: this.data.userAnswers,
