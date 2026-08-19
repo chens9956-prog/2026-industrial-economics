@@ -1929,7 +1929,8 @@ document.addEventListener('DOMContentLoaded', () => {
             duration: durationStr,
             userAnswers: { ...userAnswers },
             scoreCheckedCount: 0,
-            timestamp: new Date().toLocaleString('zh-CN', { hour12: false })
+            timestamp: new Date().toLocaleString('zh-CN', { hour12: false }),
+              timestampMs: Date.now()
         };
 
         saveSubmissionRecord(newRecord);
@@ -1956,16 +1957,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resultAccuracyTop) resultAccuracyTop.textContent = record.accuracy;
         if (resultDurationTop) resultDurationTop.textContent = record.duration;
 
+        // Calculate single and multi scores
+        let singleScore = 0;
+        let multiScore = 0;
+        if (typeof questionBank !== 'undefined') {
+            questionBank.forEach(q => {
+                const userAns = (record.userAnswers && record.userAnswers[q.id]) || '';
+                const correctAns = q.answer;
+                if (q.type === 'single' && userAns === correctAns) singleScore += 1.5;
+                if (q.type === 'multiple' && userAns.split('').sort().join('') === correctAns.split('').sort().join('')) multiScore += 2.0;
+            });
+        }
+        document.querySelectorAll('.result-breakdown-scores, #result-breakdown-scores-top').forEach(el => {
+            el.innerHTML = 单选: <span class="text-white"></span> | 多选: <span class="text-white"></span> | 合计: <span class="text-emerald-400"></span>;
+        });
+
+        // 24-hour check for breakdown
+        const msPassed = Date.now() - (record.timestampMs || Date.parse(record.timestamp.replace(/-/g, '/')));
+        const hoursPassed = msPassed / (1000 * 60 * 60);
+        const cooldownMessage = document.getElementById('cooldown-message');
+        if (hoursPassed < 24) {
+            resultBreakdown.classList.add('hidden');
+            if (cooldownMessage) cooldownMessage.classList.remove('hidden');
+        } else {
+            resultBreakdown.classList.remove('hidden');
+            if (cooldownMessage) cooldownMessage.classList.add('hidden');
+        }
+
         if (checkCount > 0) {
-            readOnlyQueryAlert.classList.remove('hidden');
-            let secLeft = 15;
-            readOnlyCountdown.textContent = secLeft;
+            const queryAlert = document.getElementById('read-only-query-alert');
+            const countdownEl = document.getElementById('read-only-countdown');
+            if (queryAlert) queryAlert.classList.remove('hidden');
+            
+            let secLeft = 1200; // 20 minutes
+            const formatTime = (s) => ${String(Math.floor(s/60)).padStart(2, '0')}:;
+            if (countdownEl) countdownEl.textContent = formatTime(secLeft);
 
             const readOnlyTimer = setInterval(() => {
                 secLeft--;
-                readOnlyCountdown.textContent = secLeft;
+                if (countdownEl) countdownEl.textContent = formatTime(secLeft);
                 if (secLeft <= 0) {
                     clearInterval(readOnlyTimer);
+                    alert('查询时间已结束，系统将自动退出。');
                     try { window.close(); } catch (e) {}
                     window.location.reload();
                 }
