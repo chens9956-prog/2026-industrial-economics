@@ -201,7 +201,7 @@
             </div>
 
             <!-- 2-Time Read-Only Query 15s Auto-Close Banner Notice -->
-            <div id="one-time-check-notice" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-xs space-y-2">
+            <div id="read-only-query-alert" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-xs space-y-2">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div class="font-bold text-sm text-amber-400 flex items-center gap-2">
                         <i class="fa-solid fa-eye text-base"></i>
@@ -211,9 +211,9 @@
                         倒计时 <strong id="read-only-countdown" class="text-amber-400 font-bold text-sm">20:00</strong> 后自动退出查分
                     </div>
                 </div>
-                <p class="text-slate-300 leading-relaxed text-[11px]">
-                    为了保证考试公平性，提交后最多提供 <strong>2 次查分机会</strong>（每次查分自动限制 15 秒）。倒计时归零后页面将自动锁定关闭。
-                </p>
+                <div id="login-limits-info" class="text-sky-200 font-mono text-[11px] mt-2 space-y-1 bg-slate-900/50 p-3 rounded-xl border border-sky-500/20">
+    <!-- Dynamic info will be injected here -->
+</div>
             </div>
 
             <!-- NEW: 1. TOP SCORE DISPLAY CARD (顶部得分卡片) -->
