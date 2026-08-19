@@ -347,16 +347,47 @@
                 alert(`学籍受信任名单保存成功！当前共有 ${newRoster.length} 名允许考试的学生。`);
             });
 
+            let questionBank = [];
+            fetch('questions_data.json').then(res => res.json()).then(data => { questionBank = data; }).catch(err => console.error(err));
+
             btnExportExcel.addEventListener('click', () => {
                 const records = getSubmissions();
                 if (records.length === 0) {
                     alert('当前没有可导出的学生成绩记录！');
                     return;
                 }
-                let csvContent = '\uFEFF学号,姓名,得分(满分100),正确率,答题用时,提交时间\n';
-                records.forEach(r => {
-                    csvContent += `"${r.id}","${r.name}",${r.score},"${r.accuracy}","${r.duration}","${r.timestamp}"\n`;
+                if (questionBank.length === 0) {
+                    alert('题库尚未加载，请稍后再试。');
+                    return;
+                }
+
+                let csvContent = '\uFEFF学号,姓名,得分(满分100),正确率,答题用时,提交时间';
+                questionBank.forEach((q, idx) => {
+                    csvContent += `,第${idx+1}题答案(${q.answer})`;
                 });
+                csvContent += ',错题分析\n';
+
+                records.forEach(r => {
+                    let row = `"${r.id}","${r.name}",${r.score},"${r.accuracy}","${r.duration}","${r.timestamp}"`;
+                    let wrongList = [];
+                    
+                    questionBank.forEach((q, idx) => {
+                        const userAns = (r.userAnswers && r.userAnswers[q.id]) || '';
+                        const correctAns = q.answer;
+                        row += `,"${userAns}"`;
+                        
+                        let isCorrect = false;
+                        if (q.type === 'single') isCorrect = userAns === correctAns;
+                        else isCorrect = userAns.split('').sort().join('') === correctAns.split('').sort().join('');
+                        
+                        if (!isCorrect) {
+                            wrongList.push(`第${idx+1}题(答:${userAns||'空'},正:${correctAns})`);
+                        }
+                    });
+                    row += `,"${wrongList.join(' | ')}"\n`;
+                    csvContent += row;
+                });
+                
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
