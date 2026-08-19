@@ -1942,14 +1942,19 @@ document.addEventListener('DOMContentLoaded', () => {
         viewExam.classList.add('hidden');
         viewResult.classList.remove('hidden');
 
-        resultStudentInfo.textContent = `${record.id} - ${record.name}`;
+        if (resultStudentInfo) resultStudentInfo.textContent = `${record.id} - ${record.name}`;
         
         const displayScoreText = `${record.score} <span class="text-base font-normal text-slate-400">/ 100分</span>`;
-        resultScore.innerHTML = displayScoreText;
+        if (resultScore) resultScore.innerHTML = displayScoreText;
         if (resultScoreTop) resultScoreTop.innerHTML = displayScoreText;
 
-        resultAccuracy.textContent = record.accuracy;
-        resultDuration.textContent = record.duration;
+        if (resultAccuracy) resultAccuracy.textContent = record.accuracy;
+        if (resultDuration) resultDuration.textContent = record.duration;
+
+        const resultAccuracyTop = document.getElementById('result-accuracy-top');
+        const resultDurationTop = document.getElementById('result-duration-top');
+        if (resultAccuracyTop) resultAccuracyTop.textContent = record.accuracy;
+        if (resultDurationTop) resultDurationTop.textContent = record.duration;
 
         if (checkCount > 0) {
             readOnlyQueryAlert.classList.remove('hidden');
