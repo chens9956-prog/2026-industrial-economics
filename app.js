@@ -1984,7 +1984,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cooldownMessage) cooldownMessage.classList.add('hidden');
         }
 
-        if (checkCount > 0) {
+        if (true) {
             const queryAlert = document.getElementById('read-only-query-alert');
             const countdownEl = document.getElementById('read-only-countdown');
             if (queryAlert) queryAlert.classList.remove('hidden');
