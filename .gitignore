@@ -10,3 +10,18 @@ __pycache__/
 
 # Local Netlify folder
 .netlify
+
+# 忽略大型二进制课件文档和压缩包
+*.pptx
+*.ppt
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pdf
+*.zip
+*.rar
+*.7z
+*.mp4
+*.mp3
+
