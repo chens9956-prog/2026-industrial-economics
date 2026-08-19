@@ -1718,8 +1718,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (existingRecord) {
             let checkCount = existingRecord.scoreCheckedCount || 0;
-            if (checkCount >= 2) {
-                alert('您已超过最大查询次数（2次），无法再次查看成绩。');
+            if (checkCount >= 3) {
+                alert('您已超过最大查询次数（3次），无法再次查看成绩。');
                 return;
             } else {
                 checkCount += 1;
@@ -1995,15 +1995,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const limitsInfoEl = document.getElementById('login-limits-info');
             if (limitsInfoEl) {
-                const remainingLogins = Math.max(0, 2 - checkCount);
+                const remainingLogins = Math.max(0, 3 - checkCount);
                 const unlockTimeMs = (record.timestampMs || Date.parse(record.timestamp.replace(/-/g, '/'))) + 24 * 60 * 60 * 1000;
                 const unlockDate = new Date(unlockTimeMs);
                 const unlockStr = `${unlockDate.getFullYear()}-${String(unlockDate.getMonth()+1).padStart(2,'0')}-${String(unlockDate.getDate()).padStart(2,'0')} ${String(unlockDate.getHours()).padStart(2,'0')}:${String(unlockDate.getMinutes()).padStart(2,'0')}`;
                 
+                const now = Date.now();
+                let unlockRemainingStr = "";
+                if (unlockTimeMs > now) {
+                    const diffMs = unlockTimeMs - now;
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+                    unlockRemainingStr = ` <span class="text-[10px] text-amber-300 ml-1">(还剩 ${diffHours}小时${diffMins}分${diffSecs}秒)</span>`;
+                } else {
+                    unlockRemainingStr = ` <span class="text-[10px] text-emerald-400 ml-1">(已开放)</span>`;
+                }
+                
                 limitsInfoEl.innerHTML = `
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col gap-1.5 sm:flex-row items-start sm:items-center justify-between">
                         <span>剩余登录次数：<strong class="text-amber-400 text-sm">${remainingLogins}</strong> 次</span>
-                        <span>答案提供时间：<strong class="text-emerald-400">${unlockStr}</strong></span>
+                        <span>答案提供时间：<strong class="text-emerald-400">${unlockStr}</strong>${unlockRemainingStr}</span>
                     </div>
                 `;
             }
@@ -2014,15 +2026,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const limitsInfoEl = document.getElementById('login-limits-info');
             if (limitsInfoEl) {
-                const remainingLogins = Math.max(0, 2 - checkCount);
+                const remainingLogins = Math.max(0, 3 - checkCount);
                 const unlockTimeMs = (record.timestampMs || Date.parse(record.timestamp.replace(/-/g, '/'))) + 24 * 60 * 60 * 1000;
                 const unlockDate = new Date(unlockTimeMs);
                 const unlockStr = `${unlockDate.getFullYear()}-${String(unlockDate.getMonth()+1).padStart(2,'0')}-${String(unlockDate.getDate()).padStart(2,'0')} ${String(unlockDate.getHours()).padStart(2,'0')}:${String(unlockDate.getMinutes()).padStart(2,'0')}`;
                 
+                const now = Date.now();
+                let unlockRemainingStr = "";
+                if (unlockTimeMs > now) {
+                    const diffMs = unlockTimeMs - now;
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+                    unlockRemainingStr = ` <span class="text-[10px] text-amber-300 ml-1">(还剩 ${diffHours}小时${diffMins}分${diffSecs}秒)</span>`;
+                } else {
+                    unlockRemainingStr = ` <span class="text-[10px] text-emerald-400 ml-1">(已开放)</span>`;
+                }
+                
                 limitsInfoEl.innerHTML = `
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col gap-1.5 sm:flex-row items-start sm:items-center justify-between">
                         <span>剩余登录次数：<strong class="text-amber-400 text-sm">${remainingLogins}</strong> 次</span>
-                        <span>答案提供时间：<strong class="text-emerald-400">${unlockStr}</strong></span>
+                        <span>答案提供时间：<strong class="text-emerald-400">${unlockStr}</strong>${unlockRemainingStr}</span>
                     </div>
                 `;
             }
