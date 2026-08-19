@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师管理后台 | 产业经济学随堂测试系统</title>
+    <meta name="description" content="产业经济学随堂测试系统教师独立管理后台。">
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white relative overflow-x-hidden font-sans transition-colors duration-300">
+
+    <!-- Background Decorative Orbs -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-sky-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Navigation Header -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-sky-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-user-shield text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg text-white leading-tight">教师/管理员独立控制台</h1>
+                    <p class="text-xs text-slate-400">产业经济学 · 随堂测试系统</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Theme Switcher Button -->
+                <button type="button" id="btn-toggle-theme" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-moon text-sky-400" id="theme-icon"></i>
+                    <span id="theme-text">深色模式</span>
+                </button>
+
+                <a href="index.html" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left"></i> 返回学生考试端
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Admin Container -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-1 flex flex-col justify-center relative z-10">
+
+        <!-- ADMIN LOGIN FORM CONTAINER -->
+        <div id="admin-auth-box" class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md mx-auto w-full space-y-5 text-center shadow-2xl">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto text-2xl font-bold">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <div>
+                <h2 class="font-extrabold text-2xl text-white">教师/管理员身份登录</h2>
+                <p class="text-xs text-slate-400 mt-1">请输入管理员专属凭证登录控制台</p>
+            </div>
+
+            <form id="form-admin-login" class="space-y-4 text-left pt-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5" for="input-admin-pass">管理员密码</label>
+                    <input type="password" id="input-admin-pass" required placeholder="请输入管理员密码" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3.5 text-white font-mono text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div id="admin-auth-error" class="hidden text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/30 text-center font-bold">
+                    密码错误，请重新输入！
+                </div>
+
+                <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/25 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> 进入教师控制台
+                </button>
+            </form>
+        </div>
+
+        <!-- ADMIN DASHBOARD PANEL (UNLOCKED) -->
+        <div id="admin-panel" class="hidden space-y-6">
+            <!-- Navigation Tabs (Score Summary vs Student Roster) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-2">
+                    <button type="button" id="tab-scores" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-table"></i>全班成绩汇总表
+                    </button>
+                    <button type="button" id="tab-roster" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-users"></i>学籍名单管理
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a href="index.html" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700">
+                        退出控制台
+                    </a>
+                </div>
+            </div>
+
+            <!-- TAB 1: SCORES SUMMARY -->
+            <div id="section-scores-tab" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="text-xs text-slate-400">已实时收集到 <span id="summary-count" class="font-bold text-sky-400">0</span> 条学生答题记录</div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btn-export-excel" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all">
+                            <i class="fa-solid fa-file-excel text-sm"></i> 导出 Excel / CSV 成绩单
+                        </button>
+                        <button type="button" id="btn-clear-records" class="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs transition-all">
+                            <i class="fa-solid fa-trash-can"></i> 重置考试记录
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Score Table -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase text-[11px] font-mono tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="px-6 py-4">学号</th>
+                                    <th class="px-6 py-4">姓名</th>
+                                    <th class="px-6 py-4">得分 (满分100)</th>
+                                    <th class="px-6 py-4">正确率</th>
+                                    <th class="px-6 py-4">答题用时</th>
+                                    <th class="px-6 py-4">提交时间</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-summary-body" class="divide-y divide-slate-800 font-mono">
+                                <!-- Injected via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: STUDENT ROSTER MANAGEMENT -->
+            <div id="section-roster-tab" class="hidden space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                    <div>
+                        <h3 class="font-extrabold text-lg text-white flex items-center gap-2">
+                            <i class="fa-solid fa-user-check text-sky-400"></i>学籍名单管理与批量导入
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">只有在此名单中的学生，才能通过学号与姓名精准匹配登录考试。</p>
+                    </div>
+
+                    <!-- Import Textarea -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">批量输入/粘贴学生名单（格式：学号,姓名 每行一组）：</label>
+                        <textarea id="textarea-roster" rows="6" placeholder="例如：
+2026010001,高建刚
+2026010002,李明
+2026010003,王芳" class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-sky-500"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-500">当前名单中共有 <strong id="roster-count" class="text-sky-400 font-mono">0</strong> 名授权学生</span>
+                        <button type="button" id="btn-save-roster" class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-600/20">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> 保存更新名单
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500">
+        <p>© 2026 产业经济学课程测试系统 · 教师控制台</p>
+    </footer>
+
+    <!-- Admin JS Script -->
+    <script>
+        const cleanStr = (str) => (str || '').toString().trim().replace(/[\s\uFEFF\xA0]+/g, '');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme Toggle Logic for Admin
+            const btnToggleTheme = document.getElementById('btn-toggle-theme');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+
+            const applyTheme = (theme) => {
+                if (theme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light-mode');
+                    document.body.classList.remove('bg-slate-950', 'text-slate-100');
+                    document.body.classList.add('bg-slate-100', 'text-slate-900');
+                    if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-amber-500';
+                    if (themeText) themeText.textContent = '浅色模式';
+                } else {
+                    document.documentElement.classList.remove('light-mode');
+                    document.documentElement.classList.add('dark');
+                    document.body.classList.remove('bg-slate-100', 'text-slate-900');
+                    document.body.classList.add('bg-slate-950', 'text-slate-100');
+                    if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-sky-400';
+                    if (themeText) themeText.textContent = '深色模式';
+                }
+            };
+
+            const savedTheme = localStorage.getItem('theme_mode') || 'dark';
+            applyTheme(savedTheme);
+
+            if (btnToggleTheme) {
+                btnToggleTheme.addEventListener('click', () => {
+                    const currentTheme = localStorage.getItem('theme_mode') === 'light' ? 'dark' : 'light';
+                    localStorage.setItem('theme_mode', currentTheme);
+                    applyTheme(currentTheme);
+                });
+            }
+
+            // Secret Admin Password
+            const SECRET_ADMIN_PASS = 'admin126';
+
+            const defaultRoster = [
+                { id: '2026010001', name: '高建刚' },
+                { id: '2026010002', name: '李明' },
+                { id: '2026010003', name: '王芳' }
+            ];
+
+            const adminAuthBox = document.getElementById('admin-auth-box');
+            const adminPanel = document.getElementById('admin-panel');
+            const formAdminLogin = document.getElementById('form-admin-login');
+            const inputAdminPass = document.getElementById('input-admin-pass');
+            const adminAuthError = document.getElementById('admin-auth-error');
+
+            const tabScores = document.getElementById('tab-scores');
+            const tabRoster = document.getElementById('tab-roster');
+            const sectionScoresTab = document.getElementById('section-scores-tab');
+            const sectionRosterTab = document.getElementById('section-roster-tab');
+            const summaryCount = document.getElementById('summary-count');
+            const tableSummaryBody = document.getElementById('table-summary-body');
+            const btnExportExcel = document.getElementById('btn-export-excel');
+            const btnClearRecords = document.getElementById('btn-clear-records');
+            const textareaRoster = document.getElementById('textarea-roster');
+            const rosterCount = document.getElementById('roster-count');
+            const btnSaveRoster = document.getElementById('btn-save-roster');
+
+            const getSubmissions = () => JSON.parse(localStorage.getItem('exam_submissions_v1') || '[]');
+            const getStudentRoster = () => {
+                const saved = localStorage.getItem('student_roster_v1');
+                let list = saved ? JSON.parse(saved) : defaultRoster;
+                defaultRoster.forEach(def => {
+                    const exists = list.some(item => cleanStr(item.id) === cleanStr(def.id) && cleanStr(item.name) === cleanStr(def.name));
+                    if (!exists) list.unshift(def);
+                });
+                return list;
+            };
+            const saveStudentRoster = (arr) => localStorage.setItem('student_roster_v1', JSON.stringify(arr));
+
+            // Form Submit Login Verification
+            formAdminLogin.addEventListener('submit', (e) => {
+                e.preventDefault();
+                adminAuthError.classList.add('hidden');
+                const val = cleanStr(inputAdminPass.value);
+
+                if (val === SECRET_ADMIN_PASS) {
+                    adminAuthBox.classList.add('hidden');
+                    adminPanel.classList.remove('hidden');
+                    renderTeacherTable();
+                    renderRosterUI();
+                } else {
+                    adminAuthError.classList.remove('hidden');
+                }
+            });
+
+            // Tabs Switch
+            tabScores.addEventListener('click', () => {
+                tabScores.className = 'px-4 py-2 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all flex items-center gap-1.5';
+                tabRoster.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition-all flex items-center gap-1.5';
+                sectionScoresTab.classList.remove('hidden');
+                sectionRosterTab.classList.add('hidden');
+            });
+
+            tabRoster.addEventListener('click', () => {
+                tabRoster.className = 'px-4 py-2 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all flex items-center gap-1.5';
+                tabScores.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition-all flex items-center gap-1.5';
+                sectionRosterTab.classList.remove('hidden');
+                sectionScoresTab.classList.add('hidden');
+            });
+
+            const renderTeacherTable = () => {
+                const records = getSubmissions();
+                summaryCount.textContent = records.length;
+                if (records.length === 0) {
+                    tableSummaryBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-500 font-sans font-bold text-sm">
+                                暂无学生提交考试记录
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                tableSummaryBody.innerHTML = records.map(r => `
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-6 py-4 font-bold text-white">${r.id}</td>
+                        <td class="px-6 py-4 font-sans font-semibold text-slate-200">${r.name}</td>
+                        <td class="px-6 py-4 font-bold ${r.score >= 60 ? 'text-emerald-400' : 'text-rose-400'}">${r.score} 分</td>
+                        <td class="px-6 py-4 text-sky-400">${r.accuracy}</td>
+                        <td class="px-6 py-4 text-slate-300">${r.duration}</td>
+                        <td class="px-6 py-4 text-slate-400 text-xs">${r.timestamp}</td>
+                    </tr>
+                `).join('');
+            };
+
+            const renderRosterUI = () => {
+                const currentRoster = getStudentRoster();
+                rosterCount.textContent = currentRoster.length;
+                textareaRoster.value = currentRoster.map(s => `${s.id},${s.name}`).join('\n');
+            };
+
+            btnSaveRoster.addEventListener('click', () => {
+                const lines = textareaRoster.value.split('\n');
+                const newRoster = [];
+                lines.forEach(line => {
+                    const parts = line.split(/[,，\s]+/).map(p => p.trim()).filter(Boolean);
+                    if (parts.length >= 2) newRoster.push({ id: cleanStr(parts[0]), name: cleanStr(parts[1]) });
+                });
+                if (newRoster.length === 0) {
+                    alert('名单格式不正确！请按格式“学号,姓名”输入。');
+                    return;
+                }
+                saveStudentRoster(newRoster);
+                rosterCount.textContent = newRoster.length;
+                alert(`学籍受信任名单保存成功！当前共有 ${newRoster.length} 名允许考试的学生。`);
+            });
+
+            btnExportExcel.addEventListener('click', () => {
+                const records = getSubmissions();
+                if (records.length === 0) {
+                    alert('当前没有可导出的学生成绩记录！');
+                    return;
+                }
+                let csvContent = '\uFEFF学号,姓名,得分(满分100),正确率,答题用时,提交时间\n';
+                records.forEach(r => {
+                    csvContent += `"${r.id}","${r.name}",${r.score},"${r.accuracy}","${r.duration}","${r.timestamp}"\n`;
+                });
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `产业经济学随堂测试成绩汇总表_${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            btnClearRecords.addEventListener('click', () => {
+                if (confirm('确定要清空所有已保存的学生成绩记录吗？')) {
+                    localStorage.removeItem('exam_submissions_v1');
+                    renderTeacherTable();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

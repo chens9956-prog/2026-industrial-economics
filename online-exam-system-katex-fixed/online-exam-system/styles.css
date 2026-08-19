@@ -1,0 +1,181 @@
+/* Online Exam System Custom Styles */
+
+@layer utilities {
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+/* Quiz Option Card Hover & Selected State */
+.quiz-option {
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.quiz-option:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+.quiz-option.selected {
+    background-color: rgba(14, 165, 233, 0.15);
+    border-color: rgba(56, 189, 248, 0.8);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+/* Question Card */
+.question-card {
+    transition: all 0.25s ease;
+}
+
+/* ==========================================================================
+   LIGHT MODE COMPLETE THEME OVERRIDES
+   ========================================================================== */
+
+html.light-mode body {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+html.light-mode header,
+html.light-mode footer {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html.light-mode header h1,
+html.light-mode header p,
+html.light-mode header span {
+    color: #0f172a !important;
+}
+
+/* Section Cards & Question Cards */
+html.light-mode section,
+html.light-mode #view-login,
+html.light-mode #view-exam,
+html.light-mode #view-result,
+html.light-mode .question-card,
+html.light-mode #admin-auth-box,
+html.light-mode #admin-panel,
+html.light-mode .bg-slate-900,
+html.light-mode .bg-slate-900\/90,
+html.light-mode .bg-slate-900\/80 {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Sticky Header in Exam View */
+html.light-mode .sticky {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Text Colors */
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3,
+html.light-mode h4,
+html.light-mode .text-white {
+    color: #0f172a !important;
+}
+
+html.light-mode .text-slate-100,
+html.light-mode .text-slate-200,
+html.light-mode .text-slate-300,
+html.light-mode .text-slate-400 {
+    color: #334155 !important;
+}
+
+html.light-mode .text-slate-500 {
+    color: #64748b !important;
+}
+
+/* Inputs & Form Elements */
+html.light-mode input,
+html.light-mode textarea,
+html.light-mode .bg-slate-950,
+html.light-mode .bg-slate-950\/60,
+html.light-mode .bg-slate-950\/80 {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html.light-mode input::placeholder,
+html.light-mode textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Options */
+html.light-mode .quiz-option {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html.light-mode .quiz-option:hover {
+    background-color: #e0f2fe !important;
+    border-color: #0284c7 !important;
+    color: #0369a1 !important;
+}
+
+html.light-mode .quiz-option.selected {
+    background-color: #e0f2fe !important;
+    border-color: #0284c7 !important;
+    color: #0369a1 !important;
+}
+
+html.light-mode .quiz-option .option-badge {
+    background-color: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+}
+
+html.light-mode .quiz-option.selected .option-badge {
+    background-color: #0284c7 !important;
+    border-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+/* Score Cards */
+html.light-mode .from-slate-950 {
+    --tw-gradient-from: #f0f9ff !important;
+}
+html.light-mode .to-slate-900 {
+    --tw-gradient-to: #e0f2fe !important;
+}
+
+html.light-mode .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #cbd5e1 !important;
+}
+
+/* Table in Admin View */
+html.light-mode table thead {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+html.light-mode table tbody tr {
+    border-color: #e2e8f0 !important;
+}
+
+html.light-mode table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+/* Direct Hyperlinks & Subtitle Links */
+html.light-mode a.text-indigo-400 {
+    color: #4f46e5 !important;
+}
+html.light-mode a.text-indigo-400:hover {
+    color: #4338ca !important;
+}
