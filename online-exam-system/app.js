@@ -1719,7 +1719,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (existingRecord) {
             let checkCount = existingRecord.scoreCheckedCount || 0;
             if (checkCount >= 2) {
-                triggerRepeatSubmissionLock(sid, sname, existingRecord.timestamp);
+                alert('您已超过最大查询次数（2次），无法再次查看成绩。');
                 return;
             } else {
                 checkCount += 1;
@@ -1969,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         document.querySelectorAll('.result-breakdown-scores, #result-breakdown-scores-top').forEach(el => {
-            el.innerHTML = 单选: <span class="text-white"></span> | 多选: <span class="text-white"></span> | 合计: <span class="text-emerald-400"></span>;
+            el.innerHTML = `单选: <span class="text-white">${singleScore}</span> | 多选: <span class="text-white">${multiScore}</span> | 合计: <span class="text-emerald-400">${record.score}</span>`;
         });
 
         // 24-hour check for breakdown
@@ -1990,7 +1990,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (queryAlert) queryAlert.classList.remove('hidden');
             
             let secLeft = 1200; // 20 minutes
-            const formatTime = (s) => ${String(Math.floor(s/60)).padStart(2, '0')}:;
+            const formatTime = (s) => `${String(Math.floor(s/60)).padStart(2, '0')}:${String(s%60).padStart(2, '0')}`;
             if (countdownEl) countdownEl.textContent = formatTime(secLeft);
 
             const readOnlyTimer = setInterval(() => {
