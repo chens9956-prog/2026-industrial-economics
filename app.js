@@ -1993,9 +1993,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const formatTime = (s) => `${String(Math.floor(s/60)).padStart(2, '0')}:${String(s%60).padStart(2, '0')}`;
             if (countdownEl) countdownEl.textContent = formatTime(secLeft);
 
+            const limitsInfoEl = document.getElementById('login-limits-info');
+            if (limitsInfoEl) {
+                const remainingLogins = Math.max(0, 2 - checkCount);
+                const unlockTimeMs = (record.timestampMs || Date.parse(record.timestamp.replace(/-/g, '/'))) + 24 * 60 * 60 * 1000;
+                const unlockDate = new Date(unlockTimeMs);
+                const unlockStr = `${unlockDate.getFullYear()}-${String(unlockDate.getMonth()+1).padStart(2,'0')}-${String(unlockDate.getDate()).padStart(2,'0')} ${String(unlockDate.getHours()).padStart(2,'0')}:${String(unlockDate.getMinutes()).padStart(2,'0')}`;
+                
+                limitsInfoEl.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span>剩余登录次数：<strong class="text-amber-400 text-sm">${remainingLogins}</strong> 次</span>
+                        <span>答案提供时间：<strong class="text-emerald-400">${unlockStr}</strong></span>
+                    </div>
+                `;
+            }
+
             const readOnlyTimer = setInterval(() => {
                 secLeft--;
                 if (countdownEl) countdownEl.textContent = formatTime(secLeft);
+
+            const limitsInfoEl = document.getElementById('login-limits-info');
+            if (limitsInfoEl) {
+                const remainingLogins = Math.max(0, 2 - checkCount);
+                const unlockTimeMs = (record.timestampMs || Date.parse(record.timestamp.replace(/-/g, '/'))) + 24 * 60 * 60 * 1000;
+                const unlockDate = new Date(unlockTimeMs);
+                const unlockStr = `${unlockDate.getFullYear()}-${String(unlockDate.getMonth()+1).padStart(2,'0')}-${String(unlockDate.getDate()).padStart(2,'0')} ${String(unlockDate.getHours()).padStart(2,'0')}:${String(unlockDate.getMinutes()).padStart(2,'0')}`;
+                
+                limitsInfoEl.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span>剩余登录次数：<strong class="text-amber-400 text-sm">${remainingLogins}</strong> 次</span>
+                        <span>答案提供时间：<strong class="text-emerald-400">${unlockStr}</strong></span>
+                    </div>
+                `;
+            }
                 if (secLeft <= 0) {
                     clearInterval(readOnlyTimer);
                     alert('查询时间已结束，系统将自动退出。');
