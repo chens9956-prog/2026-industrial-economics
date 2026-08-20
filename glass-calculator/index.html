@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萌宠外套极简科学计算器 | Cute Animal Calculator</title>
+    <meta name="description" content="包含企鹅宝宝外套、可爱小熊外套与赛博极光外观的萌宠科学计算器。">
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body id="app-body" class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-500 selection:text-white relative overflow-x-hidden font-sans transition-all duration-500">
+
+    <!-- Background Decorative Glowing Orbs -->
+    <div class="fixed top-10 left-10 w-72 h-72 bg-indigo-600/30 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+    <div class="fixed bottom-10 right-10 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 my-auto">
+        
+        <!-- Calculator Box -->
+        <main id="calc-card" class="lg:col-span-8 bg-white/10 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/80 rounded-3xl p-6 shadow-2xl space-y-5 transition-all">
+            
+            <!-- Header Controls & Skin Switcher -->
+            <header class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <div id="skin-avatar-icon" class="w-10 h-10 rounded-2xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-xl shadow-lg">
+                        🐧
+                    </div>
+                    <div>
+                        <span id="skin-title-text" class="font-extrabold text-base tracking-wide text-white block leading-tight">企鹅宝宝科学计算器</span>
+                        <span class="text-[11px] text-slate-400">萌宠外套限定款</span>
+                    </div>
+                </div>
+
+                <!-- Cute Skin Selector Buttons -->
+                <div class="flex items-center gap-1.5 bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800">
+                    <button type="button" data-skin="penguin" class="skin-btn active px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-sky-500 text-white flex items-center gap-1">
+                        🐧 企鹅外套
+                    </button>
+                    <button type="button" data-skin="bear" class="skin-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-amber-300 hover:bg-slate-800 flex items-center gap-1">
+                        🐻 小熊外套
+                    </button>
+                    <button type="button" data-skin="aurora" class="skin-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-indigo-300 hover:bg-slate-800 flex items-center gap-1">
+                        🌌 赛博极光
+                    </button>
+                </div>
+            </header>
+
+            <!-- Screen Output Container -->
+            <div id="screen-container" class="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 text-right font-mono space-y-2 shadow-inner">
+                <div id="display-expr" class="text-sm text-slate-400 overflow-x-auto scrollbar-none whitespace-nowrap min-h-[1.25rem]">0</div>
+                <div id="display-res" class="text-3xl sm:text-4xl font-extrabold text-sky-400 overflow-x-auto scrollbar-none whitespace-nowrap">= 0</div>
+            </div>
+
+            <!-- Function Mode Tabs -->
+            <div class="flex items-center justify-between text-xs font-semibold border-b border-slate-800/80 pb-2">
+                <div class="flex items-center gap-4 text-slate-400">
+                    <button type="button" id="tab-sci" class="text-sky-400 font-bold border-b-2 border-sky-400 pb-1">科学计算模式</button>
+                    <button type="button" id="tab-basic" class="hover:text-slate-200 pb-1">基础四则模式</button>
+                </div>
+                <button type="button" id="btn-toggle-history" class="text-amber-400 hover:text-amber-300 flex items-center gap-1 font-bold">
+                    <i class="fa-solid fa-clock-rotate-left"></i> 历史记录
+                </button>
+            </div>
+
+            <!-- Scientific Keys Grid -->
+            <div id="grid-sci" class="grid grid-cols-5 gap-2 pt-1">
+                <button class="btn-calc btn-sci" data-val="sin(">sin</button>
+                <button class="btn-calc btn-sci" data-val="cos(">cos</button>
+                <button class="btn-calc btn-sci" data-val="tan(">tan</button>
+                <button class="btn-calc btn-sci" data-val="ln(">ln</button>
+                <button class="btn-calc btn-sci" data-val="log(">log</button>
+
+                <button class="btn-calc btn-sci" data-val="√(">√</button>
+                <button class="btn-calc btn-sci" data-val="^">x^y</button>
+                <button class="btn-calc btn-sci" data-val="π">π</button>
+                <button class="btn-calc btn-sci" data-val="e">e</button>
+                <button class="btn-calc btn-sci" data-val="%">%</button>
+            </div>
+
+            <!-- Main Keypad Grid -->
+            <div class="grid grid-cols-5 gap-2.5">
+                <button id="btn-clear" class="btn-calc bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-extrabold">AC</button>
+                <button id="btn-del" class="btn-calc bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-extrabold">DEL</button>
+                <button class="btn-calc btn-op" data-val="(">(</button>
+                <button class="btn-calc btn-op" data-val=")">)</button>
+                <button class="btn-calc btn-op" data-val="÷">÷</button>
+
+                <button class="btn-calc btn-num" data-val="7">7</button>
+                <button class="btn-calc btn-num" data-val="8">8</button>
+                <button class="btn-calc btn-num" data-val="9">9</button>
+                <button class="btn-calc btn-op" data-val="×">×</button>
+                <button class="btn-calc btn-op" data-val="-">-</button>
+
+                <button class="btn-calc btn-num" data-val="4">4</button>
+                <button class="btn-calc btn-num" data-val="5">5</button>
+                <button class="btn-calc btn-num" data-val="6">6</button>
+                <button class="btn-calc btn-op" data-val="+">+</button>
+                <button id="btn-equal" class="btn-calc row-span-2 bg-gradient-to-b from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-xl shadow-lg shadow-sky-500/25 flex items-center justify-center">=</button>
+
+                <button class="btn-calc btn-num" data-val="1">1</button>
+                <button class="btn-calc btn-num" data-val="2">2</button>
+                <button class="btn-calc btn-num" data-val="3">3</button>
+                <button class="btn-calc btn-num col-span-2" data-val="0">0</button>
+                <button class="btn-calc btn-num" data-val=".">.</button>
+            </div>
+        </main>
+
+        <!-- History Sidebar -->
+        <aside id="history-box" class="lg:col-span-4 bg-slate-900/60 backdrop-blur-2xl border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>计算历史记录
+                </h3>
+                <button id="btn-clear-history" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">
+                    清空历史
+                </button>
+            </div>
+
+            <div id="history-list-container" class="flex-1 overflow-y-auto max-h-80 space-y-2.5 font-mono text-xs pr-1">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <div class="text-[11px] text-slate-500 text-center pt-2 border-t border-slate-800/60">
+                支持点击历史结果重新调出公式
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- App JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
