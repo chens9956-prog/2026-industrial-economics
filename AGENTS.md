@@ -30,6 +30,13 @@
 ├── padlet-mcp/
 ├── voxcpm2-voice-cloner/             # 语音克隆工具
 ├── handoff.md                        # 交接状态文件
+├── CHINESE_PUNCTUATION_RULE.md       # 全局字体、标点与换行符排版规范
+├── execute_plan_a.py                 # 云盘垃圾与重复文件安全隔离脚本
+├── scan_junk_duplicates.py           # 全盘垃圾与重复文件只读扫描脚本
+├── find_docx.py                      # 全盘 Word 文档（产业经济学）检索脚本
+├── generate_doc.py                   # NotebookLM 提示词中英文对照 Word 生成脚本
+├── generate_executive_report.py      # AI Agent 总裁报告 Word 生成脚本
+├── get_yt_chinese_antigravity.py     # YouTube 热门中文 Antigravity 2 教程检索脚本
 ├── fetch_md.py                       # 抓取 YouTube 字幕脚本
 ├── json_to_md_robust.py              # 强健版 JSON 转 Markdown 字幕处理脚本
 └── ... (各类课件 pptx 及文档资料)
@@ -47,4 +54,6 @@
 - 任何 Agent、任何电脑：**开工先读 `handoff.md`，收工必更新 `handoff.md`**
 - 修改共用档案前先读最新内容，避免覆盖其他 Agent 的变更
 - 所有回应与文件使用繁体中文（但根据用户偏好全局使用简体中文回复）
+- **字体与标点规范（强制执行）**：所有导出的文档及文字生成中，中文字体统一使用**宋体 (SimSun)**，英文与数字统一使用 **Times New Roman (新罗马字体)**；中文回复中的所有引号必须严格使用全角中文弯双引号“与”（嵌套使用中文单引号‘与’），中文冒号：、逗号，、句号。、顿号、等标点亦统一使用全角中文标点（代码与技术指令除外）。**特别例外：文末参考文献（References）的标点符号严格使用学术规范中的半角/英文标点。**
+- **换行符规范（强制执行）**：Word 文档生成与排版中，段落换行统一使用**硬回车 (Paragraph Break ↵)**，严禁混用向下箭头的软回车 (Line Break ↓ / 手动换行符)。
 - 修改前先确认计画，优先保留原有资料结构
