@@ -45,6 +45,16 @@ jobs:
         cd glass-calculator
         npx cap add android
 
+    - name: Customize App Icon
+      run: |
+        cd glass-calculator/android/app/src/main/res
+        curl -s -o custom_icon.png "https://img.icons8.com/emoji/512/penguin-emoji.png"
+        for dpi in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+          cp custom_icon.png mipmap-$dpi/ic_launcher.png || true
+          cp custom_icon.png mipmap-$dpi/ic_launcher_round.png || true
+          cp custom_icon.png mipmap-$dpi/ic_launcher_foreground.png || true
+        done
+
     - name: Build APK
       run: |
         cd glass-calculator/android
