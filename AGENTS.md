@@ -38,6 +38,10 @@
 ├── generate_doc.py                   # NotebookLM 提示词中英文对照 Word 生成脚本
 ├── generate_executive_report.py      # AI Agent 总裁报告 Word 生成脚本
 ├── get_yt_chinese_antigravity.py     # YouTube 热门中文 Antigravity 2 教程检索脚本
+├── scan_and_clean_pdfs.py           # 扫描与清理指定格式 PDF 脚本
+├── build_mindmap_structure.py        # PDF 专著目录提取与思维导图结构化脚本
+├── generate_mindmap_files.py         # 专著 4 层架构 Word/Markdown 思维导图生成脚本
+├── generate_interactive_html.py      # 专著 4 层交互式 HTML 思维导图网页生成脚本
 ├── fetch_md.py                       # 抓取 YouTube 字幕脚本
 ├── json_to_md_robust.py              # 强健版 JSON 转 Markdown 字幕处理脚本
 └── ... (各类课件 pptx 及文档资料)
