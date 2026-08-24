@@ -125,14 +125,19 @@ from pptx.enum.text import PP_ALIGN
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.oxml.xmlchemy import OxmlElement
 
-# 1. 调色板常量
-COLOR_DARK_BLUE = RGBColor(27, 58, 92)     # #1B3A5C
-COLOR_MED_BLUE  = RGBColor(46, 134, 193)    # #2E86C1
-COLOR_AMBER     = RGBColor(200, 140, 27)    # #C88C1B
-COLOR_LIGHT_GREY= RGBColor(242, 242, 242)   # #F2F2F2
-COLOR_TEXT_DARK = RGBColor(44, 44, 44)      # #2C2C2C
-COLOR_TEXT_MUTED= RGBColor(107, 107, 107)   # #6B6B6B
-COLOR_WHITE     = RGBColor(255, 255, 255)
+# 1. 调色板常量 (清爽高对比学术风)
+COLOR_DARK_BLUE    = RGBColor(27, 58, 92)      # #1B3A5C 主文字/重点主色（深海蓝）
+COLOR_MED_BLUE     = RGBColor(46, 134, 193)    # #2E86C1 辅助科技蓝
+COLOR_AMBER        = RGBColor(200, 140, 27)    # #C88C1B 暖琥珀金（高亮线/提示标）
+COLOR_LIGHT_BG     = RGBColor(248, 249, 250)   # #F8F9FA 极清爽卡片底色
+COLOR_CARD_BORDER  = RGBColor(218, 225, 231)   # #DAE1E7 精致浅灰边框
+COLOR_HEADER_BG_1  = RGBColor(235, 243, 250)   # #EBF3FA 主卡片清爽浅蓝顶栏底色
+COLOR_HEADER_BG_2  = RGBColor(240, 244, 248)   # #F0F4F8 次卡片清爽浅灰蓝顶栏底色
+COLOR_SOFT_BLUE    = RGBColor(220, 237, 248)   # #DCEDF8 结论高亮浅蓝底
+COLOR_WARM_CREAM   = RGBColor(254, 252, 246)   # #FEFCF6 案例暖杏微浅底色
+COLOR_TEXT_DARK    = RGBColor(44, 44, 44)      # #2C2C2C 正文暗炭灰
+COLOR_TEXT_MUTED   = RGBColor(107, 107, 107)   # #6B6B6B 次要中灰
+COLOR_WHITE        = RGBColor(255, 255, 255)   # #FFFFFF 纯白
 
 class AcademicSlideDeck:
     def __init__(self):
@@ -142,7 +147,7 @@ class AcademicSlideDeck:
         self.blank_layout = self.prs.slide_layouts[6]
         self.slide_count = 0
 
-    def _apply_font(self, run, size_pt, bold=False, color=None, east_asia_font="SimSun"):
+    def _apply_font(self, run, size_pt, bold=False, color=None, east_asia_font="Microsoft YaHei"):
         run.font.name = 'Times New Roman'
         run.font.size = Pt(size_pt)
         run.font.bold = bold
@@ -151,7 +156,7 @@ class AcademicSlideDeck:
         rPr = run._r.get_or_add_rPr()
         ea = OxmlElement('a:ea')
         ea.set('typeface', east_asia_font)
-        rPr.insert(0, ea)
+        rPr.append(ea)
 
     def _add_p(self, text_frame, text, size_pt, bold=False, color=None, align=None, is_first=False):
         p = text_frame.paragraphs[0] if is_first else text_frame.add_paragraph()
@@ -167,29 +172,29 @@ class AcademicSlideDeck:
         self.slide_count += 1
         slide = self.prs.slides.add_slide(self.blank_layout)
 
-        # 顶部深蓝标线
-        top_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(13.333), Inches(0.08))
+        # 顶部深蓝细线 (0.06")
+        top_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(13.333), Inches(0.06))
         top_bar.fill.solid(); top_bar.fill.fore_color.rgb = COLOR_DARK_BLUE; top_bar.line.fill.background()
 
         # 左侧科技蓝基准线
-        left_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.08), Inches(7.42))
+        left_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.06), Inches(0.05), Inches(7.44))
         left_bar.fill.solid(); left_bar.fill.fore_color.rgb = COLOR_MED_BLUE; left_bar.line.fill.background()
 
         # L1 章节标
-        tx_l1 = slide.shapes.add_textbox(Inches(0.50), Inches(0.22), Inches(6.00), Inches(0.35))
+        tx_l1 = slide.shapes.add_textbox(Inches(0.50), Inches(0.20), Inches(6.00), Inches(0.35))
         self._add_p(tx_l1.text_frame, l1_chapter, 12, True, COLOR_MED_BLUE, is_first=True)
 
         # L2 核心标题
-        tx_l2 = slide.shapes.add_textbox(Inches(0.50), Inches(0.55), Inches(11.50), Inches(0.60))
+        tx_l2 = slide.shapes.add_textbox(Inches(0.50), Inches(0.52), Inches(11.50), Inches(0.60))
         self._add_p(tx_l2.text_frame, l2_section, 26, True, COLOR_DARK_BLUE, is_first=True)
 
         # 琥珀金高亮线
-        line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.50), Inches(1.18), Inches(1.20), Inches(0.04))
+        line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.50), Inches(1.15), Inches(1.20), Inches(0.04))
         line.fill.solid(); line.fill.fore_color.rgb = COLOR_AMBER; line.line.fill.background()
 
         # 页脚
         tx_foot = slide.shapes.add_textbox(Inches(0.50), Inches(7.00), Inches(5.00), Inches(0.35))
-        self._add_p(tx_foot.text_frame, "产业经济学 · 刘志彪（第3版）", 10, False, COLOR_TEXT_MUTED, is_first=True)
+        self._add_p(tx_foot.text_frame, "管理经济学 · 学术课件系列", 10, False, COLOR_TEXT_MUTED, is_first=True)
 
         # 页码
         tx_num = slide.shapes.add_textbox(Inches(12.30), Inches(7.00), Inches(0.80), Inches(0.35))
@@ -198,30 +203,38 @@ class AcademicSlideDeck:
         return slide
 
     def add_dual_cards(self, slide, left_title, left_points, right_title, right_points):
-        """渲染双栏对比卡片"""
+        """渲染双栏对比卡片 (清爽高对比版)"""
         cards = [
-            (Inches(0.50), Inches(5.80), COLOR_DARK_BLUE, left_title, left_points),
-            (Inches(6.60), Inches(6.20), COLOR_MED_BLUE, right_title, right_points)
+            (Inches(0.50), Inches(5.80), COLOR_HEADER_BG_1, COLOR_DARK_BLUE, left_title, left_points),
+            (Inches(6.60), Inches(6.20), COLOR_HEADER_BG_2, COLOR_MED_BLUE, right_title, right_points)
         ]
-        for left_x, width, h_color, title, points in cards:
-            # 浅灰底容器
-            bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left_x, Inches(1.50), width, Inches(5.30))
-            bg.fill.solid(); bg.fill.fore_color.rgb = COLOR_LIGHT_GREY; bg.line.fill.background()
+        for left_x, width, h_bg_color, theme_color, title, points in cards:
+            # 清爽浅底容器
+            bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left_x, Inches(1.45), width, Inches(5.30))
+            bg.fill.solid(); bg.fill.fore_color.rgb = COLOR_LIGHT_BG; bg.line.color.rgb = COLOR_CARD_BORDER; bg.line.width = Pt(1)
 
-            # 色块标题顶栏
-            h_bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left_x, Inches(1.50), width, Inches(0.60))
-            h_bg.fill.solid(); h_bg.fill.fore_color.rgb = h_color; h_bg.line.fill.background()
+            # 清爽浅色顶栏
+            h_bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left_x, Inches(1.45), width, Inches(0.55))
+            h_bg.fill.solid(); h_bg.fill.fore_color.rgb = h_bg_color; h_bg.line.color.rgb = COLOR_CARD_BORDER; h_bg.line.width = Pt(1)
 
-            # 顶栏文字
-            tx_h = slide.shapes.add_textbox(left_x + Inches(0.30), Inches(1.55), width - Inches(0.60), Inches(0.50))
-            self._add_p(tx_h.text_frame, title, 18, True, COLOR_WHITE, is_first=True)
+            # 顶栏左侧色标条
+            v_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left_x, Inches(1.45), Inches(0.08), Inches(0.55))
+            v_stripe.fill.solid(); v_stripe.fill.fore_color.rgb = theme_color; v_stripe.line.fill.background()
+
+            # 顶栏文字（深色字，极高清晰度）
+            tx_h = slide.shapes.add_textbox(left_x + Inches(0.25), Inches(1.50), width - Inches(0.50), Inches(0.45))
+            self._add_p(tx_h.text_frame, title, 16, True, theme_color, is_first=True)
 
             # 内容文字
-            tx_c = slide.shapes.add_textbox(left_x + Inches(0.30), Inches(2.25), width - Inches(0.60), Inches(4.45))
+            tx_c = slide.shapes.add_textbox(left_x + Inches(0.25), Inches(2.15), width - Inches(0.50), Inches(4.50))
             tf = tx_c.text_frame
             tf.word_wrap = True
             for i, pt in enumerate(points):
-                self._add_p(tf, f"• {pt}", 13, False, COLOR_TEXT_DARK, is_first=(i == 0))
+                if isinstance(pt, tuple):
+                    self._add_p(tf, pt[0], 14, True, theme_color, is_first=(i==0))
+                    self._add_p(tf, f"  {pt[1]}", 12.5, False, COLOR_TEXT_DARK)
+                else:
+                    self._add_p(tf, f"• {pt}", 12.5, False, COLOR_TEXT_DARK, is_first=(i == 0))
 ```
 
 ---
