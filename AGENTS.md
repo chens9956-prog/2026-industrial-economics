@@ -38,6 +38,8 @@
 ├── generate_doc.py                   # NotebookLM 提示词中英文对照 Word 生成脚本
 ├── generate_executive_report.py      # AI Agent 总裁报告 Word 生成脚本
 ├── get_yt_chinese_antigravity.py     # YouTube 热门中文 Antigravity 2 教程检索脚本
+├── notebooklm-watermark-remover/     # NotebookLM 水印粉碎器 Pro (独立 EXE 与桌面 GUI)
+├── convert_svg_to_pdf.py            # SVG 思维导图转 PDF 与合并脚本
 ├── scan_and_clean_pdfs.py           # 扫描与清理指定格式 PDF 脚本
 ├── build_mindmap_structure.py        # PDF 专著目录提取与思维导图结构化脚本
 ├── generate_mindmap_files.py         # 专著 4 层架构 Word/Markdown 思维导图生成脚本
