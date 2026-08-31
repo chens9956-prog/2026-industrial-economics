@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-双层 PDF 生成工具 v18.0 终极并发旗舰版 (多书真正同时并行处理 · 绝对秒停强杀引擎 · 自由伸缩滚动 · 企鹅萌宠)
-软件标题：PaddleOCR 双层 PDF 生成工具 v18.0 (CPU版) [终极并发旗舰版]
-1. 【版本绝对更新确认 (v18.0)】：
-   - 窗口标题、顶栏、状态栏、关于信息全部明确显示为 v18.0 终极并发旗舰版！
+双层 PDF 生成工具 v19.0 智能跳过并发旗舰版 (多书真正同时并行处理 · 智能跳过已OCR文档 · 绝对秒停强杀引擎 · 自由伸缩滚动 · 企鹅萌宠)
+软件标题：PaddleOCR 双层 PDF 生成工具 v19.0 (CPU版) [智能跳过并发旗舰版]
+
+1. 【全维度智能自动跳过机制 (Smart Skip System)】：
+   - 智能识别源文件：自动检测源 PDF 是否已经含有可检索文字层（抽样分析文字密度，若已是双层/文字版 PDF 则秒级跳过）；
+   - 智能识别目标成果：自动检索目标目录中是否已存在该书籍的历史 OCR 成果（包括带时间戳、随机数的前缀成果文件）；
+   - 智能识别表格状态：若列表中部分书籍已处理完成，再次启动时自动跳过已完成项，绝不重复耗费算力！
 2. 【多书真正同时并行处理 (True Parallel Multi-Book Processing)】：
    - 彻底打破单书串行限制！当并发设为 2/3/4 时，列表中的多本书籍将「同时」进入处理状态（全部显示处理中，各自进度条同时推进）；
    - 采用多线程并行池 (ThreadPoolExecutor)，充分利用多核 CPU，多本书籍同时飞速生成双层 PDF！
@@ -550,7 +553,7 @@ class DroppableTableWidget(QTableWidget):
 
 
 # -------------------------------------------------------------
-# 多书并行并发工作线程 (True Multi-Book Parallel Worker)
+# 多书并行并发工作线程 (True Multi-Book Parallel Worker with Smart Skip)
 # -------------------------------------------------------------
 class ParallelMultiBookWorker(QThread):
     progress_signal = Signal(str, int, int, dict, int, int, int)
@@ -581,7 +584,7 @@ class ParallelMultiBookWorker(QThread):
     def cancel(self):
         self.cancel_event.set()
 
-    def _generate_out_path(self, f_path):
+    def _generate_out_path(self, f_path: str) -> str:
         base_name = os.path.basename(f_path)
         stem, _ = os.path.splitext(base_name)
         tags = []
@@ -599,6 +602,92 @@ class ParallelMultiBookWorker(QThread):
             return os.path.join(self.out_dir, out_name)
         else:
             return os.path.join(os.path.dirname(f_path), out_name)
+
+    def _find_existing_output(self, f_path: str) -> Optional[str]:
+        """智能探测目标目录中是否已经存在该书籍的 OCR 成果文件"""
+        base_name = os.path.basename(f_path)
+        stem, _ = os.path.splitext(base_name)
+        target_dir = self.out_dir if (self.out_dir and os.path.exists(self.out_dir)) else os.path.dirname(f_path)
+        
+        if not target_dir or not os.path.exists(target_dir):
+            return None
+            
+        # 1. 优先检查精确生成路径
+        exact_out = self._generate_out_path(f_path)
+        if os.path.exists(exact_out) and os.path.getsize(exact_out) > 0 and os.path.abspath(exact_out) != os.path.abspath(f_path):
+            return exact_out
+            
+        # 2. 智能扫描目标目录下所有匹配的前缀成果（兼容带历史时间戳、随机数、_searchable 等）
+        try:
+            for fname in os.listdir(target_dir):
+                if fname.lower().endswith(".pdf"):
+                    full_p = os.path.join(target_dir, fname)
+                    if os.path.abspath(full_p) == os.path.abspath(f_path):
+                        continue
+                    f_stem, _ = os.path.splitext(fname)
+                    if f_stem.startswith(stem) and any(tag in f_stem.lower() for tag in ["_ocr", "_searchable", "_双层", "_可检索"]):
+                        if os.path.getsize(full_p) > 1024:  # 大于 1KB
+                            return full_p
+        except Exception:
+            pass
+            
+        return None
+
+    def _is_source_already_searchable(self, f_path: str) -> Tuple[bool, str]:
+        """深度探测源 PDF 是否已经含有可检索文字层 (即已完成 OCR 或本身为文字版)"""
+        if not f_path.lower().endswith(".pdf") or not os.path.exists(f_path):
+            return False, ""
+            
+        base_name = os.path.basename(f_path)
+        stem, _ = os.path.splitext(base_name)
+        
+        # 1. 如果源文件名本身带有 _ocr 或 _searchable 标识，且内含文字
+        if any(tag in stem.lower() for tag in ["_ocr", "_searchable", "_可检索", "_双层"]):
+            try:
+                doc = fitz.open(f_path)
+                if len(doc) > 0:
+                    sample_txt = "".join(doc[i].get_text() for i in range(min(len(doc), 3)))
+                    doc.close()
+                    if len(sample_txt.strip()) >= 30:
+                        return True, "文件名含OCR标识且包含文字层"
+            except Exception:
+                pass
+                
+        # 2. 深度分析多页文字层密度
+        try:
+            doc = fitz.open(f_path)
+            if doc.is_encrypted:
+                try: doc.authenticate("")
+                except Exception: pass
+            total_pages = len(doc)
+            if total_pages == 0:
+                doc.close()
+                return False, ""
+                
+            sample_indices = list(range(min(5, total_pages)))
+            if total_pages > 10:
+                mid = total_pages // 2
+                sample_indices.extend([mid - 1, mid, mid + 1])
+            sample_indices = sorted(list(set(sample_indices)))
+            
+            pages_with_text = 0
+            total_chars = 0
+            for idx in sample_indices:
+                if idx < total_pages:
+                    txt = doc[idx].get_text().strip()
+                    if len(txt) >= 30:
+                        pages_with_text += 1
+                        total_chars += len(txt)
+            doc.close()
+            
+            # 抽样页中绝大部分页面均已有丰富文字，判定为已具备文字层
+            if pages_with_text >= max(1, int(len(sample_indices) * 0.7)):
+                avg_chars = total_chars / float(len(sample_indices))
+                return True, f"抽样平均 {avg_chars:.0f} 字/页"
+        except Exception:
+            pass
+            
+        return False, ""
 
     def _get_pdf_pages_fast(self, f_path: str) -> int:
         try:
@@ -628,7 +717,7 @@ class ParallelMultiBookWorker(QThread):
         if self.global_total_pages == 0:
             self.global_total_pages = 1
             
-        self.log_signal.emit(f"=== 批量总计: {total_files} 本书，约 {self.global_total_pages} 页，同时开启多书并行处理 ===")
+        self.log_signal.emit(f"=== 批量总计: {total_files} 本书，约 {self.global_total_pages} 页，多书并行处理启动 ===")
         
         engine = DualLayerPDFEngineProV9(
             dpi=self.dpi,
@@ -649,17 +738,39 @@ class ParallelMultiBookWorker(QThread):
                 return
                 
             base_name = os.path.basename(f_path)
-            out_path = self._generate_out_path(f_path)
             tot_p = self.file_total_pages.get(f_path, 1)
             
-            if self.skip_existing and os.path.exists(out_path) and os.path.getsize(out_path) > 0:
-                with self.lock:
-                    self.file_done_pages[f_path] = tot_p
-                    skipped_cnt += 1
-                self.item_status_signal.emit(f_path, "跳过", str(tot_p), "100%", "-", "-", "-")
-                self.log_signal.emit(f"目标已存在，跳过: {os.path.basename(out_path)}")
-                return
-                
+            # ---------------------------------------------------------
+            # 智能跳过判定 (Smart Skip)
+            # ---------------------------------------------------------
+            if self.skip_existing:
+                # 判定 A: 目标目录是否已有历史输出成果
+                existing_out = self._find_existing_output(f_path)
+                if existing_out:
+                    with self.lock:
+                        self.file_done_pages[f_path] = tot_p
+                        skipped_cnt += 1
+                        global_done = sum(self.file_done_pages.values())
+                        global_pct = min(100, int((global_done / float(self.global_total_pages)) * 100))
+                    self.item_status_signal.emit(f_path, "跳过(已有成果)", str(tot_p), "100%", "-", "-", "-")
+                    self.progress_signal.emit(f_path, tot_p, tot_p, {"pct": 100, "speed_pph": 0}, global_done, self.global_total_pages, global_pct)
+                    self.log_signal.emit(f"💡 [智能跳过] 目标已存在 OCR 成果: {os.path.basename(existing_out)}，已自动跳过。")
+                    return
+                    
+                # 判定 B: 源 PDF 本身是否已具备可检索文字层 (已完成 OCR)
+                is_searchable, reason = self._is_source_already_searchable(f_path)
+                if is_searchable:
+                    with self.lock:
+                        self.file_done_pages[f_path] = tot_p
+                        skipped_cnt += 1
+                        global_done = sum(self.file_done_pages.values())
+                        global_pct = min(100, int((global_done / float(self.global_total_pages)) * 100))
+                    self.item_status_signal.emit(f_path, "跳过(已有文字)", str(tot_p), "100%", "-", "-", "-")
+                    self.progress_signal.emit(f_path, tot_p, tot_p, {"pct": 100, "speed_pph": 0}, global_done, self.global_total_pages, global_pct)
+                    self.log_signal.emit(f"💡 [智能跳过] 文档本身已具备可检索文字层 ({reason}): {base_name}，自动跳过。")
+                    return
+
+            out_path = self._generate_out_path(f_path)
             self.item_status_signal.emit(f_path, "处理中", str(tot_p), "0%", "...", "...", "-")
             self.log_signal.emit(f"[并行开始] 正在处理: {base_name} (共 {tot_p} 页)")
             
@@ -718,7 +829,7 @@ class ParallelMultiBookWorker(QThread):
 class DualLayerPDFAppPySide6(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PaddleOCR 双层 PDF 生成工具 v18.0 (CPU版) [终极并发旗舰版]")
+        self.setWindowTitle("PaddleOCR 双层 PDF 生成工具 v19.0 (CPU版) [智能跳过并发旗舰版]")
         self.resize(1120, 960)
         self.setMinimumSize(980, 800)
         self.setAcceptDrops(True)
@@ -812,7 +923,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         left_layout.addStretch()
         header_layout.addWidget(left_box)
         
-        self.lbl_title = QLabel("PaddleOCR 双层 PDF 生成工具 v18.0")
+        self.lbl_title = QLabel("PaddleOCR 双层 PDF 生成工具 v19.0")
         self.lbl_title.setFont(QFont("Microsoft YaHei", 14, QFont.Bold))
         self.lbl_title.setAlignment(Qt.AlignCenter)
         self.lbl_title.setStyleSheet("color: #ffffff; background: transparent;")
@@ -962,7 +1073,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         row2.addStretch()
         set_layout.addLayout(row2)
         
-        # 【第 3 行】：置信度阈值 / 提示 / 休眠 / 跳过 / MKLDNN
+        # 【第 3 行】：置信度阈值 / 提示 / 休眠 / 智能跳过 / MKLDNN
         row3 = QHBoxLayout()
         row3.setSpacing(10)
         
@@ -980,9 +1091,12 @@ class DualLayerPDFAppPySide6(QMainWindow):
         
         self.cb_sleep = QCheckBox("完成后休眠")
         row3.addWidget(self.cb_sleep)
-        self.cb_skip = QCheckBox("跳过已完成文件")
+        
+        self.cb_skip = QCheckBox("自动跳过已 OCR / 已完成文档")
         self.cb_skip.setChecked(True)
+        self.cb_skip.setToolTip("开启后，若文档本身已具备文字层，或目标目录已有该书历史 OCR 成果，将自动跳过，极大节省时间。")
         row3.addWidget(self.cb_skip)
+        
         self.cb_mkldnn = QCheckBox("MKLDNN 加速")
         self.cb_mkldnn.setChecked(True)
         row3.addWidget(self.cb_mkldnn)
@@ -1060,7 +1174,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         
         self.text_log = QTextEdit()
         self.text_log.setReadOnly(True)
-        self.text_log.append(">>> 就绪 — v18.0 多书真正并行并发处理与绝对秒停强杀架构已就绪。")
+        self.text_log.append(">>> 就绪 — v19.0 智能跳过已OCR文档、多书真正并行并发处理与绝对秒停强杀架构已就绪。")
         log_layout.addWidget(self.text_log)
         main_layout.addWidget(group_log, stretch=3)
         
@@ -1087,7 +1201,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar_left = QLabel("已处理 0/0 页 | 速度: 0 页/时 | 剩余: ~0分钟")
-        self.status_bar_right = QLabel("v18.0 Pro AI 终极并发旗舰版 (PySide6 / MKLDNN加速)")
+        self.status_bar_right = QLabel("v19.0 Pro AI 智能跳过并发旗舰版 (PySide6 / MKLDNN加速)")
         self.status_bar.addWidget(self.status_bar_left, 1)
         self.status_bar.addPermanentWidget(self.status_bar_right)
 
@@ -1245,7 +1359,8 @@ class DualLayerPDFAppPySide6(QMainWindow):
         file_pct = metrics.get("pct", int((curr_p/float(tot_p))*100) if tot_p > 0 else 0)
         for r in range(self.table.rowCount()):
             if self.table.item(r, 1).text() == f_path:
-                self.table.item(r, 2).setText("处理中")
+                if "跳过" not in self.table.item(r, 2).text():
+                    self.table.item(r, 2).setText("处理中")
                 self.table.item(r, 3).setText(str(tot_p))
                 self.table.item(r, 4).setText(f"{file_pct}% ({curr_p}/{tot_p})")
                 break
@@ -1279,7 +1394,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
             self.progress_bar.setValue(100)
             self.lbl_prog_title.setText("总进度: 100%")
             self.lbl_prog_pct.setText("100%")
-            summary = f"全部完成！成功 {success} 个，跳过 {skipped} 个，失败 {failed} 个，耗时 {cost_s:.1f} 秒。"
+            summary = f"全部完成！成功 {success} 个，自动跳过 {skipped} 个，失败 {failed} 个，耗时 {cost_s:.1f} 秒。"
             self.lbl_metrics.setText(summary)
             self.status_bar_left.setText(summary)
             self.log(f"=== {summary} ===")
