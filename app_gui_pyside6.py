@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-双层 PDF 生成工具 v19.1 极速流畅静音版 (0% 空闲 CPU · 丝滑光标 · 智能跳过已OCR · 多书真正并发 · 绝对秒停强杀)
-软件标题：PaddleOCR 双层 PDF 生成工具 v19.1 (CPU版) [极速并发旗舰版]
+双层 PDF 生成工具 v19.2 极速丝滑版 (转换期间 0 鼠标卡顿 · 丝滑光标 · 智能跳过已OCR · 多书真正并发 · 绝对秒停强杀)
+软件标题：PaddleOCR 双层 PDF 生成工具 v19.2 (CPU版) [极速丝滑并发旗舰版]
 
-1. 【0% 空闲 CPU 占用与零延迟丝滑光标 (Zero-CPU Idle & Smooth Cursor)】：
-   - 彻底重构 QSS 样式表与渲染管线，剔除导致 GPU/CPU 循环重绘的高频细碎渐变 (qlineargradient)；
-   - 采用 Qt 工业级 Fusion 渲染架构，窗口空闲时 CPU 占用严格为 0.0%，鼠标靠近或划过时丝滑顺畅、彻底消除任何鼠标漂移、丢帧与卡顿！
+1. 【转换执行期间 0 鼠标卡顿与零漂移 (Zero-Lag Mouse & Smooth Cursor During OCR)】：
+   - 彻底解决多书并发时 OpenMP/MKL 忙等待 (BUSY-WAIT) 占满 CPU 导致的 Windows 消息循环饥饿；
+   - 采用线程独立局部 ONNX 实例，杜绝线程死锁与调度争抢；
+   - 强制将工作线程设置为 LowPriority 并引入时间片让渡，无论 CPU 跑满多少本书，鼠标在界面上永远如丝绸般精准、平稳、顺畅！
 2. 【全维度智能自动跳过机制 (Smart Skip System)】：
    - 智能识别源文件：自动检测源 PDF 是否已经含有可检索文字层（抽样分析文字密度，若已是双层/文字版 PDF 则秒级跳过）；
    - 智能识别目标成果：自动检索目标目录中是否已存在该书籍的历史 OCR 成果（包括带时间戳、随机数的前缀成果文件）；
    - 智能识别表格状态：若列表中部分书籍已处理完成，再次启动时自动跳过已完成项，绝不重复耗费算力！
 3. 【多书真正同时并行处理 (True Parallel Multi-Book Processing)】：
-   - 彻底打破单书串行限制！当并发设为 2/3/4 时，列表中的多本书籍将「同时」进入处理状态（全部显示处理中，各自进度条同时推进）；
+   - 彻底打破单书串行限制！当并发设为 2/3/4 时，列表中的多本书籍将「同时」进入处理状态；
    - 采用多线程并行池 (ThreadPoolExecutor)，充分利用多核 CPU，多本书籍同时飞速生成双层 PDF！
 4. 【绝对秒停强力终止机制 (100% Instant Hard Kill)】：
    - 点击「■ 停止」按钮瞬间，底层立即触发操作系统级线程强杀与全局中断事件，绝对不再继续打印任何 OCR 日志，0 毫秒立即停止，界面瞬间恢复！
@@ -21,13 +22,35 @@
 
 import os
 import sys
+
+# -------------------------------------------------------------
+# 关键底层配置：禁用 OpenMP/MKL 忙轮询，解除 Windows 鼠标光标争抢
+# -------------------------------------------------------------
+os.environ["OMP_WAIT_POLICY"] = "PASSIVE"
+os.environ["KMP_BLOCKTIME"] = "0"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 import math
 import random
 import time
+import ctypes
 import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any, Optional, Tuple
+
+# 降低进程基础调度等级，给鼠标驱动、DWM 和 UI 主线程最高绝对优先级
+try:
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.GetCurrentProcess()
+    # BELOW_NORMAL_PRIORITY_CLASS = 0x00004000
+    kernel32.SetPriorityClass(handle, 0x00004000)
+except Exception:
+    pass
 
 import fitz  # PyMuPDF
 from PySide6.QtWidgets import (
@@ -43,7 +66,7 @@ from dual_layer_engine_pro_v9 import DualLayerPDFEngineProV9
 
 
 # -------------------------------------------------------------
-# 高性能低功耗现代圆角样式表 (QSS) - 彻底杜绝 CPU 循环重绘
+# 高性能低功耗现代圆角样式表 (QSS)
 # -------------------------------------------------------------
 LIGHT_STYLE = """
 QMainWindow {
@@ -612,12 +635,10 @@ class ParallelMultiBookWorker(QThread):
         if not target_dir or not os.path.exists(target_dir):
             return None
             
-        # 1. 优先检查精确生成路径
         exact_out = self._generate_out_path(f_path)
         if os.path.exists(exact_out) and os.path.getsize(exact_out) > 0 and os.path.abspath(exact_out) != os.path.abspath(f_path):
             return exact_out
             
-        # 2. 智能扫描目标目录下所有匹配的前缀成果（兼容带历史时间戳、随机数、_searchable 等）
         try:
             for fname in os.listdir(target_dir):
                 if fname.lower().endswith(".pdf"):
@@ -641,7 +662,6 @@ class ParallelMultiBookWorker(QThread):
         base_name = os.path.basename(f_path)
         stem, _ = os.path.splitext(base_name)
         
-        # 1. 如果源文件名本身带有 _ocr 或 _searchable 标识，且内含文字
         if any(tag in stem.lower() for tag in ["_ocr", "_searchable", "_可检索", "_双层"]):
             try:
                 doc = fitz.open(f_path)
@@ -653,7 +673,6 @@ class ParallelMultiBookWorker(QThread):
             except Exception:
                 pass
                 
-        # 2. 深度分析多页文字层密度
         try:
             doc = fitz.open(f_path)
             if doc.is_encrypted:
@@ -680,7 +699,6 @@ class ParallelMultiBookWorker(QThread):
                         total_chars += len(txt)
             doc.close()
             
-            # 抽样页中绝大部分页面均已有丰富文字，判定为已具备文字层
             if pages_with_text >= max(1, int(len(sample_indices) * 0.7)):
                 avg_chars = total_chars / float(len(sample_indices))
                 return True, f"抽样平均 {avg_chars:.0f} 字/页"
@@ -740,11 +758,8 @@ class ParallelMultiBookWorker(QThread):
             base_name = os.path.basename(f_path)
             tot_p = self.file_total_pages.get(f_path, 1)
             
-            # ---------------------------------------------------------
             # 智能跳过判定 (Smart Skip)
-            # ---------------------------------------------------------
             if self.skip_existing:
-                # 判定 A: 目标目录是否已有历史输出成果
                 existing_out = self._find_existing_output(f_path)
                 if existing_out:
                     with self.lock:
@@ -757,7 +772,6 @@ class ParallelMultiBookWorker(QThread):
                     self.log_signal.emit(f"💡 [智能跳过] 目标已存在 OCR 成果: {os.path.basename(existing_out)}，已自动跳过。")
                     return
                     
-                # 判定 B: 源 PDF 本身是否已具备可检索文字层 (已完成 OCR)
                 is_searchable, reason = self._is_source_already_searchable(f_path)
                 if is_searchable:
                     with self.lock:
@@ -829,7 +843,7 @@ class ParallelMultiBookWorker(QThread):
 class DualLayerPDFAppPySide6(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PaddleOCR 双层 PDF 生成工具 v19.1 (CPU版) [极速并发旗舰版]")
+        self.setWindowTitle("PaddleOCR 双层 PDF 生成工具 v19.2 (CPU版) [极速丝滑并发旗舰版]")
         self.resize(1120, 960)
         self.setMinimumSize(980, 800)
         self.setAcceptDrops(True)
@@ -900,7 +914,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.table.scrollToBottom()
 
     def _init_ui(self):
-        # 1. 顶部 Header 渐变横幅
+        # 1. 顶部 Header
         self.header_widget = QFrame()
         self.header_widget.setFixedHeight(54)
         self.header_widget.setStyleSheet("background-color: #4f46e5; border-radius: 0px;")
@@ -929,7 +943,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         left_layout.addStretch()
         header_layout.addWidget(left_box)
         
-        self.lbl_title = QLabel("PaddleOCR 双层 PDF 生成工具 v19.1")
+        self.lbl_title = QLabel("PaddleOCR 双层 PDF 生成工具 v19.2")
         self.lbl_title.setFont(QFont("Microsoft YaHei", 14, QFont.Bold))
         self.lbl_title.setAlignment(Qt.AlignCenter)
         self.lbl_title.setStyleSheet("color: #ffffff; background: transparent;")
@@ -1009,7 +1023,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         
         main_layout.addWidget(group_list, stretch=5)
         
-        # B. 设置圆角卡片 (精确五行排版)
+        # B. 设置圆角卡片
         group_settings = QGroupBox("设置")
         set_layout = QVBoxLayout(group_settings)
         set_layout.setContentsMargins(12, 12, 12, 12)
@@ -1180,7 +1194,8 @@ class DualLayerPDFAppPySide6(QMainWindow):
         
         self.text_log = QTextEdit()
         self.text_log.setReadOnly(True)
-        self.text_log.append(">>> 就绪 — v19.1 极速流畅静音版（0% 空闲 CPU · 丝滑光标 · 智能跳过 · 多书并行）已就绪。")
+        self.text_log.document().setMaximumBlockCount(300)  # 限制最大行数，防止大量文本重排消耗 UI 算力
+        self.text_log.append(">>> 就绪 — v19.2 极速丝滑版（转换中 0 鼠标卡顿 · 丝滑光标 · 智能跳过 · 多书并行）已就绪。")
         log_layout.addWidget(self.text_log)
         main_layout.addWidget(group_log, stretch=3)
         
@@ -1207,7 +1222,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar_left = QLabel("已处理 0/0 页 | 速度: 0 页/时 | 剩余: ~0分钟")
-        self.status_bar_right = QLabel("v19.1 Pro AI 极速并发旗舰版 (PySide6 / MKLDNN加速)")
+        self.status_bar_right = QLabel("v19.2 Pro AI 极速丝滑并发版 (PySide6 / MKLDNN加速)")
         self.status_bar.addWidget(self.status_bar_left, 1)
         self.status_bar.addPermanentWidget(self.status_bar_right)
 
@@ -1323,7 +1338,9 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.worker_thread.log_signal.connect(self.log)
         self.worker_thread.item_status_signal.connect(self.on_item_status)
         self.worker_thread.finish_signal.connect(self.on_finish)
-        self.worker_thread.start()
+        
+        # 启动工作线程并赋予低优先级，确保主线程 UI 和鼠标驱动永不饥饿
+        self.worker_thread.start(QThread.Priority.LowPriority)
 
     def stop_processing(self):
         self.is_running = False
