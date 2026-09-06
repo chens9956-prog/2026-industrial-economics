@@ -12,7 +12,7 @@ import time
 sys.stdout.reconfigure(encoding='utf-8')
 
 def build_and_deploy():
-    print("🚀 开始编译发布 v20.0 硬件控温丝滑版（五重硬件 CPU 治理 · 物理硬隔离 · 0 鼠标卡顿）...")
+    print("🚀 开始编译发布 v20.1 硬件控温丝滑版（消除序号重复 · 顶底分层进度节约内存 · 工具条固定 · 0 鼠标卡顿）...")
     
     release_dir = r"C:\v20_release"
     os.makedirs(release_dir, exist_ok=True)
@@ -27,13 +27,17 @@ def build_and_deploy():
     shutil.copyfile(src_icon_png, os.path.join(release_dir, "penguin_icon.png"))
     shutil.copyfile(src_icon_ico, os.path.join(release_dir, "penguin_icon.ico"))
     
+    py_exe = r"C:\Users\ausu\AppData\Local\Programs\Python\Python312\python.exe"
+    if not os.path.exists(py_exe):
+        py_exe = sys.executable
+        
     cmd = [
-        sys.executable, "-m", "PyInstaller",
+        py_exe, "-m", "PyInstaller",
         "--noconfirm",
         "--clean",
         "--onefile",
         "--windowed",
-        "--name", "DualLayerPDF_v20_Pro",
+        "--name", "DualLayerPDF_v20_1_Pro",
         "--icon", "penguin_icon.ico",
         "--add-data", "penguin_icon.png;.",
         "--add-data", "penguin_icon.ico;.",
@@ -56,7 +60,7 @@ def build_and_deploy():
         print("❌ 编译失败:", res.stderr)
         return
         
-    dist_exe = os.path.join(release_dir, "dist", "DualLayerPDF_v20_Pro.exe")
+    dist_exe = os.path.join(release_dir, "dist", "DualLayerPDF_v20_1_Pro.exe")
     if not os.path.exists(dist_exe):
         print("❌ 未找到生成的 EXE 文件！")
         return
@@ -72,9 +76,9 @@ def build_and_deploy():
     time.sleep(1)
     
     deploy_targets = [
-        r"E:\软件下载\双层可检索PDF制作神器_v20.0_硬件控温丝滑版.exe",
+        r"E:\软件下载\双层可检索PDF制作神器_v20.1_硬件控温丝滑版.exe",
         r"E:\软件下载\双层可检索PDF制作神器.exe",
-        r"C:\Users\ausu\Desktop\双层可检索PDF制作神器_v20.0_硬件控温丝滑版.exe"
+        r"C:\Users\ausu\Desktop\双层可检索PDF制作神器_v20.1_硬件控温丝滑版.exe"
     ]
     
     for t in deploy_targets:
@@ -86,8 +90,9 @@ def build_and_deploy():
         except Exception as e:
             print(f"  ⚠️ 部署失败 {t}: {e}")
 
-    # 清理所有旧版快捷方式与文件
+    # 清理所有旧版桌面快捷方式与历史文件
     old_files = [
+        r"C:\Users\ausu\Desktop\双层可检索PDF制作神器_v20.0_硬件控温丝滑版.exe",
         r"C:\Users\ausu\Desktop\双层可检索PDF制作神器_v19.2_极速丝滑并发版.exe",
         r"C:\Users\ausu\Desktop\双层可检索PDF制作神器_v19.0_智能跳过并发版.exe",
         r"C:\Users\ausu\Desktop\双层可检索PDF制作神器_v18.0_终极并发版.exe",

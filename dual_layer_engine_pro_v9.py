@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-双层可检索 PDF 终极旗舰极速引擎 (DualLayerPDFEngine Pro v20.0 硬件级控温丝滑版)
+双层可检索 PDF 终极旗舰极速引擎 (DualLayerPDFEngine Pro v20.1 硬件级控温丝滑版)
 完全对标并超越参考工具的全部核心功能与性能规范：
 
 【五重硬件级 CPU 治理与 0 鼠标卡顿架构 (5-Layer CPU Governance)】：
@@ -13,6 +13,29 @@
 
 import os
 import sys
+
+# -------------------------------------------------------------
+# 防崩溃底层保护：防止 PyInstaller --windowed 模式下 NoneType.write 崩溃
+# -------------------------------------------------------------
+class SafeDummyStream:
+    def write(self, s):
+        pass
+    def flush(self):
+        pass
+    def isatty(self):
+        return False
+
+if sys.stdout is None:
+    sys.stdout = SafeDummyStream()
+if sys.stderr is None:
+    sys.stderr = SafeDummyStream()
+
+import logging
+logging.basicConfig(level=logging.INFO, handlers=[logging.NullHandler()])
+for handler in list(logging.root.handlers):
+    if isinstance(handler, logging.StreamHandler):
+        if handler.stream is None or not hasattr(handler.stream, 'write'):
+            handler.stream = SafeDummyStream()
 
 # -------------------------------------------------------------
 # 关键底层配置：禁用 OpenMP/MKL 忙轮询，解除 Windows 鼠标光标争抢
@@ -62,6 +85,10 @@ def apply_hardware_cpu_governance():
 apply_hardware_cpu_governance()
 
 import fitz  # PyMuPDF
+try:
+    fitz.TOOLS.mupdf_display_errors(False)
+except Exception:
+    pass
 import numpy as np
 from PIL import Image
 from reportlab.pdfgen import canvas
@@ -306,7 +333,7 @@ class DualLayerPDFEngineProV9:
         buf.seek(0)
         return buf.getvalue()
 
-    def process_pdf(self, input_pdf_path: str, output_pdf_path: str, progress_callback=None, log_callback=None, cancel_event=None) -> Dict[str, Any]:
+    def process_pdf(self, input_pdf_path: str, output_pdf_path: str, thread_id: int = 1, model_name: str = "PP-OCRv6_small_onnx", progress_callback=None, log_callback=None, cancel_event=None) -> Dict[str, Any]:
         """流式处理 PDF 并无损保留原书签目录结构 (TOC/Bookmarks)"""
         t_start = time.time()
         abs_in = os.path.abspath(input_pdf_path)
@@ -343,10 +370,12 @@ class DualLayerPDFEngineProV9:
             pass
             
         zoom_val = round(self.dpi / 72.0, 2)
+        prefix = f"[线程{thread_id}] " if thread_id else ""
         
         if log_callback:
-            toc_info = f"已提取原书目录书签 ({len(orig_toc)} 项)" if orig_toc else "无原书签"
-            log_callback(f"开始转换: {os.path.basename(input_pdf_path)} (共 {total_pages} 页, DPI: {self.dpi}, {toc_info})")
+            log_callback(f"{prefix}初始化 OCR 引擎...")
+            log_callback(f"{prefix}文件: {os.path.basename(input_pdf_path)} ({total_pages} 页)")
+            log_callback(f"{prefix}正在初始化 PaddleOCR {model_name} 引擎 - 设备: CPU (MKLDNN加速)")
             
         reader = PdfReader(abs_in)
         writer = PdfWriter()
@@ -358,6 +387,8 @@ class DualLayerPDFEngineProV9:
                 raise InterruptedError("用户已取消操作")
                 
             p_num = p_idx + 1
+            if log_callback:
+                log_callback(f"{prefix}第 {p_num}/{total_pages} 页 (zoom={zoom_val:.2f}, 等效 {self.dpi} DPI) ...")
             
             page = doc_in[p_idx]
             rect = page.rect
@@ -386,12 +417,24 @@ class DualLayerPDFEngineProV9:
                 doc_in.close()
                 raise InterruptedError("用户已取消操作")
                 
-            # 智能重排阅读顺序
+            # 智能重排阅读顺序并统计竖排文本块
             sorted_res = sort_text_boxes_reading_order(ocr_res)
             box_count = len(sorted_res)
             
-            if log_callback and (p_num % 5 == 0 or p_num == total_pages or p_num == 1):
-                log_callback(f"[进程] 第 {p_num}/{total_pages} 页完成 ({box_count} 个文本块已重排)")
+            vert_count = 0
+            for box_item in sorted_res:
+                try:
+                    pts = box_item[0]
+                    xs = [pt[0] for pt in pts]
+                    ys = [pt[1] for pt in pts]
+                    if (max(ys) - min(ys)) > 1.5 * (max(xs) - min(xs)):
+                        vert_count += 1
+                except Exception:
+                    pass
+            vert_str = f", {vert_count} 个竖排" if vert_count > 0 else ""
+            
+            if log_callback:
+                log_callback(f"{prefix}第 {p_num} 页完成 ({box_count} 个文本块已按阅读顺序重排{vert_str})")
                 
             # 收集文本
             page_texts = [item[1].strip() for item in sorted_res if item[1] and item[1].strip()]
@@ -428,10 +471,23 @@ class DualLayerPDFEngineProV9:
                 }
                 progress_callback(p_num, total_pages, info_metrics)
                 
+            # 每 5 页或最后一页强制垃圾回收 + PyMuPDF 底层 C 内存池收缩
+            if p_num % 5 == 0 or p_num == total_pages:
+                try:
+                    fitz.TOOLS.store_shrink(100)
+                except Exception:
+                    pass
+                gc.collect()
+                
             # 动态控温微休眠，强制让渡 CPU 时间片给 Windows 鼠标中断与 DWM 桌面合成器
             time.sleep(self.pacing_sleep)
 
         doc_in.close()
+        try:
+            fitz.TOOLS.store_shrink(100)
+        except Exception:
+            pass
+        gc.collect()
         
         # 写入最终 PDF 并 100% 注入原书签目录大纲
         out_dir = os.path.dirname(os.path.abspath(output_pdf_path))

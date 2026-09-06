@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-双层 PDF 生成工具 v20.0 硬件级控温丝滑版 (五重硬件级 CPU 治理 · 0 鼠标卡顿 · 智能跳过已OCR · 多书真正并发 · 绝对秒停强杀)
-软件标题：PaddleOCR 双层 PDF 生成工具 v20.0 (CPU版) [硬件控温丝滑旗舰版]
+双层 PDF 生成工具 v20.1 硬件级控温丝滑版 (五重硬件级 CPU 治理 · 0 鼠标卡顿 · 智能跳过已OCR · 顶底分层进度节约内存 · 位置固定)
+软件标题：PaddleOCR 双层 PDF 生成工具 v20.1 (CPU版) [硬件控温丝滑旗舰版]
 
 1. 【五重硬件级 CPU 治理与 0 鼠标卡顿 (5-Layer CPU Governance & Zero-Lag Mouse)】：
    - 核心物理隔离 (CPU Affinity)：强制扣留 Core 0/1 专门服务 Windows 系统、DWM 桌面合成器与鼠标驱动，物理杜绝 CPU 冲上 95%+；
@@ -25,6 +25,42 @@ import os
 import sys
 
 # -------------------------------------------------------------
+# 防崩溃底层保护：防止 PyInstaller --windowed 模式下 NoneType.write 崩溃
+# -------------------------------------------------------------
+import traceback
+
+class SafeDummyStream:
+    def write(self, s):
+        pass
+    def flush(self):
+        pass
+    def isatty(self):
+        return False
+
+if sys.stdout is None:
+    sys.stdout = SafeDummyStream()
+if sys.stderr is None:
+    sys.stderr = SafeDummyStream()
+
+def global_exception_handler(exctype, value, tb):
+    """全局异常捕获钩子：拦截所有未捕获异常，记录至崩溃日志，杜绝无预警静默闪退"""
+    err_msg = "".join(traceback.format_exception(exctype, value, tb))
+    log_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "crash_dump.log")
+    try:
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 未捕获异常崩溃拦截:\n{err_msg}\n")
+    except Exception:
+        pass
+sys.excepthook = global_exception_handler
+
+import logging
+logging.basicConfig(level=logging.INFO, handlers=[logging.NullHandler()])
+for handler in list(logging.root.handlers):
+    if isinstance(handler, logging.StreamHandler):
+        if handler.stream is None or not hasattr(handler.stream, 'write'):
+            handler.stream = SafeDummyStream()
+
+# -------------------------------------------------------------
 # 关键底层配置：禁用 OpenMP/MKL 忙轮询，解除 Windows 鼠标光标争抢
 # -------------------------------------------------------------
 os.environ["OMP_WAIT_POLICY"] = "PASSIVE"
@@ -40,6 +76,7 @@ import random
 import time
 import ctypes
 import subprocess
+import queue
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any, Optional, Tuple
@@ -73,10 +110,10 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QLineEdit, QComboBox, QSpinBox, QCheckBox,
     QProgressBar, QTextEdit, QTableWidget, QTableWidgetItem, QHeaderView,
-    QFileDialog, QMessageBox, QGroupBox, QStatusBar, QFrame, QSizePolicy
+    QFileDialog, QMessageBox, QGroupBox, QStatusBar, QFrame, QSizePolicy, QMenu
 )
 from PySide6.QtCore import Qt, QThread, Signal, Slot, QSize, QUrl
-from PySide6.QtGui import QIcon, QFont, QColor, QPixmap, QDragEnterEvent, QDropEvent
+from PySide6.QtGui import QIcon, QFont, QColor, QPixmap, QDragEnterEvent, QDropEvent, QAction, QKeySequence, QKeyEvent
 
 from dual_layer_engine_pro_v9 import DualLayerPDFEngineProV9
 
@@ -171,6 +208,18 @@ QPushButton#btn_main_stop {
 }
 QPushButton#btn_main_stop:hover {
     background-color: #dc2626;
+}
+QPushButton#btn_open_dir {
+    background-color: #059669;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    min-height: 44px;
+    padding: 0 20px;
+}
+QPushButton#btn_open_dir:hover {
+    background-color: #047857;
 }
 QLineEdit {
     background-color: #ffffff;
@@ -407,6 +456,18 @@ QPushButton#btn_main_stop {
 QPushButton#btn_main_stop:hover {
     background-color: #dc2626;
 }
+QPushButton#btn_open_dir {
+    background-color: #10b981;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    min-height: 44px;
+    padding: 0 20px;
+}
+QPushButton#btn_open_dir:hover {
+    background-color: #059669;
+}
 QLineEdit {
     background-color: #0f172a;
     border: 1px solid #334155;
@@ -590,6 +651,26 @@ class DroppableTableWidget(QTableWidget):
         else:
             event.ignore()
 
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.matches(QKeySequence.Copy) or (event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_C):
+            self.copy_selected_paths()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def copy_selected_paths(self):
+        selected_rows = sorted(set(idx.row() for idx in self.selectedIndexes()))
+        if not selected_rows:
+            return
+        paths = []
+        for r in selected_rows:
+            it = self.item(r, 1)
+            if it and it.text():
+                paths.append(it.text())
+        if paths:
+            clip_text = "\n".join(paths)
+            QApplication.clipboard().setText(clip_text)
+
 
 # -------------------------------------------------------------
 # 多书并行并发工作线程 (True Multi-Book Parallel Worker with Smart Skip)
@@ -600,7 +681,7 @@ class ParallelMultiBookWorker(QThread):
     item_status_signal = Signal(str, str, str, str, str, str, str)
     finish_signal = Signal(int, int, int, int, float, bool)
 
-    def __init__(self, file_list, dpi, concurrency, thresh, out_dir, skip_existing, cpu_mode, export_txt, export_docx, export_text_pdf, sleep_on_fin, naming_options):
+    def __init__(self, file_list, dpi, concurrency, thresh, out_dir, skip_existing, cpu_mode, export_txt, export_docx, export_text_pdf, sleep_on_fin, naming_options, model_str="PP-OCRv6"):
         super().__init__()
         self.file_list = list(file_list)
         self.dpi = dpi
@@ -614,6 +695,7 @@ class ParallelMultiBookWorker(QThread):
         self.export_text_pdf = export_text_pdf
         self.sleep_on_fin = sleep_on_fin
         self.naming_options = naming_options
+        self.model_str = model_str
         self.cancel_event = threading.Event()
         self.lock = threading.Lock()
         
@@ -740,8 +822,6 @@ class ParallelMultiBookWorker(QThread):
         t_start_all = time.time()
         was_cancelled = False
         
-        mode_desc = {"quiet": "温控静音 (<50% CPU)", "balanced": "标准均衡 (<70% CPU)", "fast": "极速全速 (<85% CPU)"}.get(self.cpu_mode, "标准均衡")
-        self.log_signal.emit(f"=== 正在启动硬件级控温引擎 (共 {total_files} 本书, 并发: {self.concurrency}, 控温模式: {mode_desc}, DPI: {self.dpi}) ===")
         for f in self.file_list:
             if self.cancel_event.is_set():
                 break
@@ -753,7 +833,13 @@ class ParallelMultiBookWorker(QThread):
         if self.global_total_pages == 0:
             self.global_total_pages = 1
             
-        self.log_signal.emit(f"=== 批量总计: {total_files} 本书，约 {self.global_total_pages} 页，硬件核心硬隔离保护已生效 ===")
+        max_workers = min(total_files, self.concurrency)
+        self.log_signal.emit(f"启动 {max_workers} 个并发线程处理 {total_files} 个文件")
+        
+        # 维护线程 ID 池（1, 2, ...），确保日志严格对标规范 [线程1], [线程2]
+        thread_id_queue = queue.Queue()
+        for tid in range(1, max_workers + 1):
+            thread_id_queue.put(tid)
         
         engine = DualLayerPDFEngineProV9(
             dpi=self.dpi,
@@ -805,7 +891,13 @@ class ParallelMultiBookWorker(QThread):
 
             out_path = self._generate_out_path(f_path)
             self.item_status_signal.emit(f_path, "处理中", str(tot_p), "0%", "...", "...", "-")
-            self.log_signal.emit(f"[并行开始] 正在处理: {base_name} (共 {tot_p} 页)")
+            
+            # 获取当前工作线程的 Thread ID
+            current_tid = 1
+            try:
+                current_tid = thread_id_queue.get(timeout=1.0)
+            except Exception:
+                current_tid = 1
             
             def page_cb(curr_p, t_p, metrics):
                 if self.cancel_event.is_set():
@@ -820,6 +912,8 @@ class ParallelMultiBookWorker(QThread):
                 res = engine.process_pdf(
                     f_path,
                     out_path,
+                    thread_id=current_tid,
+                    model_name=self.model_str,
                     progress_callback=page_cb,
                     log_callback=lambda m: self.log_signal.emit(m),
                     cancel_event=self.cancel_event
@@ -831,7 +925,7 @@ class ParallelMultiBookWorker(QThread):
                 speed_s = f"{res['speed_ppm']:.0f}页/分"
                 fin_time = time.strftime("%H:%M:%S")
                 self.item_status_signal.emit(f_path, "完成", str(res["total_pages"]), "100%", cost_s, speed_s, fin_time)
-                self.log_signal.emit(f"🎉 [完成] {base_name} 转换完成！耗时: {cost_s}")
+                self.log_signal.emit(f"[线程{current_tid}] {base_name} 处理完成 (耗时: {cost_s})")
             except InterruptedError:
                 self.item_status_signal.emit(f_path, "已取消", str(tot_p), "0%", "-", "-", "-")
             except Exception as e:
@@ -839,8 +933,12 @@ class ParallelMultiBookWorker(QThread):
                     failed_cnt += 1
                 self.item_status_signal.emit(f_path, "失败", str(tot_p), "0%", "-", "-", "-")
                 self.log_signal.emit(f"❌ 制作失败: {base_name}, 错误: {e}")
+            finally:
+                try:
+                    thread_id_queue.put(current_tid)
+                except Exception:
+                    pass
 
-        max_workers = min(total_files, self.concurrency)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(process_single_book, f) for f in self.file_list]
             for fut in as_completed(futures):
@@ -862,7 +960,7 @@ class ParallelMultiBookWorker(QThread):
 class DualLayerPDFAppPySide6(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PaddleOCR 双层 PDF 生成工具 v20.0 (CPU版) [硬件控温丝滑旗舰版]")
+        self.setWindowTitle("PaddleOCR 双层 PDF 生成工具 v20.1 (CPU版) [2026-09-04 最新版]")
         self.resize(1120, 960)
         self.setMinimumSize(980, 800)
         self.setAcceptDrops(True)
@@ -922,14 +1020,14 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.file_list.append(f_path)
         row = self.table.rowCount()
         self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
+        item0 = QTableWidgetItem(str(row + 1))
+        item0.setTextAlignment(Qt.AlignCenter)
+        self.table.setItem(row, 0, item0)
         self.table.setItem(row, 1, QTableWidgetItem(f_path))
-        self.table.setItem(row, 2, QTableWidgetItem("等待"))
-        self.table.setItem(row, 3, QTableWidgetItem("-"))
-        self.table.setItem(row, 4, QTableWidgetItem("0%"))
-        self.table.setItem(row, 5, QTableWidgetItem("-"))
-        self.table.setItem(row, 6, QTableWidgetItem("-"))
-        self.table.setItem(row, 7, QTableWidgetItem("-"))
+        for col, val in [(2, "等待"), (3, "-"), (4, "0%"), (5, "-"), (6, "-"), (7, "-")]:
+            it = QTableWidgetItem(val)
+            it.setTextAlignment(Qt.AlignCenter)
+            self.table.setItem(row, col, it)
         self.table.scrollToBottom()
 
     def _init_ui(self):
@@ -962,7 +1060,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         left_layout.addStretch()
         header_layout.addWidget(left_box)
         
-        self.lbl_title = QLabel("PaddleOCR 双层 PDF 生成工具 v20.0")
+        self.lbl_title = QLabel("PaddleOCR 双层 PDF 生成工具 v20.1")
         self.lbl_title.setFont(QFont("Microsoft YaHei", 14, QFont.Bold))
         self.lbl_title.setAlignment(Qt.AlignCenter)
         self.lbl_title.setStyleSheet("color: #ffffff; background: transparent;")
@@ -991,46 +1089,60 @@ class DualLayerPDFAppPySide6(QMainWindow):
         main_layout.setSpacing(10)
         main_layout.addWidget(self.header_widget)
         
-        # A. PDF 文件列表卡片
+        # A. PDF 文件列表卡片 (仅容纳表格，表格自由滚动伸缩，绝不遮挡文档)
         group_list = QGroupBox("PDF 文件列表 (可拖拽 PDF 文件到此处)")
         group_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         list_layout = QVBoxLayout(group_list)
-        list_layout.setContentsMargins(12, 10, 12, 10)
-        list_layout.setSpacing(8)
+        list_layout.setContentsMargins(10, 16, 10, 10)
         
         self.table = DroppableTableWidget(0, 8)
-        self.table.setMinimumHeight(220)
+        self.table.setMinimumHeight(180)
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.table.setHorizontalHeaderLabels(["序号", "文件路径", "状态", "页数", "进度", "耗时", "速度", "完成时间"])
+        self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.show_table_context_menu)
+        self.table.cellDoubleClicked.connect(self.on_table_cell_double_clicked)
         self.table.files_dropped.connect(self.handle_dropped_paths)
         list_layout.addWidget(self.table)
         
-        tb_layout = QHBoxLayout()
-        tb_layout.setSpacing(8)
+        main_layout.addWidget(group_list, stretch=5)
+        
+        # 中间独立操作工具条：固定位置、固定高度，排在文件列表正下方，绝不遮挡待处理文件
+        toolbar_box = QWidget()
+        toolbar_box.setFixedHeight(42)
+        toolbar_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        tb_layout = QHBoxLayout(toolbar_box)
+        tb_layout.setContentsMargins(4, 2, 4, 2)
+        tb_layout.setSpacing(10)
         
         self.btn_add_f = QPushButton("添加文件")
         self.btn_add_f.setCursor(Qt.PointingHandCursor)
+        self.btn_add_f.setFixedHeight(32)
         self.btn_add_f.clicked.connect(self.add_files)
         tb_layout.addWidget(self.btn_add_f)
         
         self.btn_add_d = QPushButton("添加文件夹")
         self.btn_add_d.setCursor(Qt.PointingHandCursor)
+        self.btn_add_d.setFixedHeight(32)
         self.btn_add_d.clicked.connect(self.add_directory)
         tb_layout.addWidget(self.btn_add_d)
         
         self.btn_del = QPushButton("移除选中")
         self.btn_del.setObjectName("btn_danger")
         self.btn_del.setCursor(Qt.PointingHandCursor)
+        self.btn_del.setFixedHeight(32)
         self.btn_del.clicked.connect(self.remove_selected)
         tb_layout.addWidget(self.btn_del)
         
         self.btn_clear = QPushButton("清空列表")
         self.btn_clear.setObjectName("btn_gray")
         self.btn_clear.setCursor(Qt.PointingHandCursor)
+        self.btn_clear.setFixedHeight(32)
         self.btn_clear.clicked.connect(self.clear_files)
         tb_layout.addWidget(self.btn_clear)
         
@@ -1038,9 +1150,8 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.lbl_count = QLabel("共 0 个文件")
         self.lbl_count.setStyleSheet("color: #64748b; font-weight: bold;")
         tb_layout.addWidget(self.lbl_count)
-        list_layout.addLayout(tb_layout)
         
-        main_layout.addWidget(group_list, stretch=5)
+        main_layout.addWidget(toolbar_box)
         
         # B. 设置圆角卡片
         group_settings = QGroupBox("设置")
@@ -1227,7 +1338,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.text_log = QTextEdit()
         self.text_log.setReadOnly(True)
         self.text_log.document().setMaximumBlockCount(300)
-        self.text_log.append(">>> 就绪 — v20.0 硬件级控温丝滑版（五重硬件 CPU 治理 · 物理硬隔离 · 0 鼠标卡顿 · 智能跳过）已就绪。")
+        self.text_log.append(">>> 就绪 — v20.1 硬件级控温丝滑版（2026-09-04 最新编译 · 按钮防遮挡 · 逐页日志进程 · 路径复制 · 一键打开输出目录）已就绪。")
         log_layout.addWidget(self.text_log)
         main_layout.addWidget(group_log, stretch=3)
         
@@ -1248,13 +1359,19 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.btn_stop.clicked.connect(self.stop_processing)
         btn_action_layout.addWidget(self.btn_stop)
         
+        self.btn_open_out = QPushButton("📂 打开输出目录")
+        self.btn_open_out.setObjectName("btn_open_dir")
+        self.btn_open_out.setCursor(Qt.PointingHandCursor)
+        self.btn_open_out.clicked.connect(self.open_output_dir)
+        btn_action_layout.addWidget(self.btn_open_out)
+        
         main_layout.addLayout(btn_action_layout)
         
         # 4. 底部固定状态栏
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar_left = QLabel("已处理 0/0 页 | 速度: 0 页/时 | 剩余: ~0分钟")
-        self.status_bar_right = QLabel("v20.0 Pro AI 硬件控温丝滑版 (PySide6 / MKLDNN加速)")
+        self.status_bar_right = QLabel("v20.1 Pro 旗舰版 (2026-09-04 最新构建 · PySide6 / MKLDNN)")
         self.status_bar.addWidget(self.status_bar_left, 1)
         self.status_bar.addPermanentWidget(self.status_bar_right)
 
@@ -1311,7 +1428,10 @@ class DualLayerPDFAppPySide6(QMainWindow):
                 self.file_list.remove(fp)
             self.table.removeRow(r)
         for r in range(self.table.rowCount()):
-            self.table.item(r, 0).setText(str(r + 1))
+            it0 = self.table.item(r, 0)
+            if it0:
+                it0.setText(str(r + 1))
+                it0.setTextAlignment(Qt.AlignCenter)
         self.lbl_count.setText(f"共 {len(self.file_list)} 个文件")
 
     def clear_files(self):
@@ -1323,6 +1443,63 @@ class DualLayerPDFAppPySide6(QMainWindow):
         d = QFileDialog.getExistingDirectory(self, "选择输出目录")
         if d:
             self.entry_out_dir.setText(d)
+
+    def _open_path_in_explorer(self, target_path: str):
+        if not target_path:
+            return
+        try:
+            target_path = os.path.abspath(target_path)
+            if os.path.isfile(target_path):
+                subprocess.Popen(f'explorer /select,"{target_path}"')
+            elif os.path.isdir(target_path):
+                subprocess.Popen(f'explorer "{target_path}"')
+            else:
+                d = os.path.dirname(target_path)
+                if os.path.exists(d):
+                    subprocess.Popen(f'explorer "{d}"')
+        except Exception as e:
+            self.log(f"⚠️ 打开目录失败: {e}")
+
+    def open_output_dir(self):
+        target_d = self.entry_out_dir.text().strip()
+        if not target_d and self.file_list:
+            target_d = os.path.dirname(os.path.abspath(self.file_list[0]))
+        if not target_d or not os.path.exists(target_d):
+            target_d = os.getcwd()
+        self._open_path_in_explorer(target_d)
+        self.status_bar_left.setText(f"已打开输出目录: {os.path.basename(target_d)}")
+
+    def show_table_context_menu(self, pos):
+        item = self.table.itemAt(pos)
+        if not item:
+            return
+        row = item.row()
+        it_path = self.table.item(row, 1)
+        f_path = it_path.text() if it_path else ""
+        
+        menu = QMenu(self)
+        action_copy = menu.addAction("📋 复制文件路径 (Ctrl+C)")
+        action_open_dir = menu.addAction("📂 打开文档所在目录")
+        menu.addSeparator()
+        action_remove = menu.addAction("🗑️ 从列表中移除")
+        
+        selected_action = menu.exec(self.table.viewport().mapToGlobal(pos))
+        if selected_action == action_copy and f_path:
+            QApplication.clipboard().setText(f_path)
+            self.status_bar_left.setText(f"已复制文件路径: {os.path.basename(f_path)}")
+        elif selected_action == action_open_dir and f_path:
+            self._open_path_in_explorer(f_path)
+        elif selected_action == action_remove:
+            self.remove_selected()
+
+    def on_table_cell_double_clicked(self, row, col):
+        it = self.table.item(row, 1)
+        if not it:
+            return
+        f_path = it.text()
+        if f_path:
+            QApplication.clipboard().setText(f_path)
+            self.status_bar_left.setText(f"已复制文件路径: {os.path.basename(f_path)}")
 
     def start_processing(self):
         if not self.file_list:
@@ -1349,6 +1526,8 @@ class DualLayerPDFAppPySide6(QMainWindow):
             "isbn": self.tag_isbn.isChecked()
         }
         
+        model_name_str = self.combo_model.currentText()
+        
         self.is_running = True
         self.btn_start.setEnabled(False)
         self.btn_start.setText("转换中...")
@@ -1367,7 +1546,8 @@ class DualLayerPDFAppPySide6(QMainWindow):
             export_docx=self.cb_docx.isChecked(),
             export_text_pdf=self.cb_text_pdf.isChecked(),
             sleep_on_fin=self.cb_sleep.isChecked(),
-            naming_options=naming_options
+            naming_options=naming_options,
+            model_str=model_name_str
         )
         
         self.worker_thread.progress_signal.connect(self.on_progress)
@@ -1407,6 +1587,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
         if not self.is_running:
             return
             
+        # 1. 底部的进程（全局进度条、进度百分比、状态栏指标）：每一页显示一次变动（逐页实时丝滑更新）
         self.progress_bar.setValue(global_pct)
         self.lbl_prog_title.setText(f"总进度: {global_pct}%")
         self.lbl_prog_pct.setText(f"{global_pct}%")
@@ -1415,14 +1596,16 @@ class DualLayerPDFAppPySide6(QMainWindow):
         self.lbl_metrics.setText(metric_str)
         self.status_bar_left.setText(metric_str)
         
-        file_pct = metrics.get("pct", int((curr_p/float(tot_p))*100) if tot_p > 0 else 0)
-        for r in range(self.table.rowCount()):
-            if self.table.item(r, 1).text() == f_path:
-                if "跳过" not in self.table.item(r, 2).text():
-                    self.table.item(r, 2).setText("处理中")
-                self.table.item(r, 3).setText(str(tot_p))
-                self.table.item(r, 4).setText(f"{file_pct}% ({curr_p}/{tot_p})")
-                break
+        # 2. 顶部的进程（顶部文件列表当前处理行的进度列）：每 5 页显示一次变动以深度节约内存与UI重绘开销（第1页与最后一页强制变动刷新）
+        if curr_p % 5 == 0 or curr_p == 1 or curr_p >= tot_p:
+            file_pct = metrics.get("pct", int((curr_p / float(tot_p)) * 100) if tot_p > 0 else 0)
+            for r in range(self.table.rowCount()):
+                if self.table.item(r, 1).text() == f_path:
+                    if "跳过" not in self.table.item(r, 2).text():
+                        self.table.item(r, 2).setText("处理中")
+                    self.table.item(r, 3).setText(str(tot_p))
+                    self.table.item(r, 4).setText(f"{file_pct}% ({curr_p}/{tot_p})")
+                    break
 
     @Slot(str, str, str, str, str, str, str)
     def on_item_status(self, f_path, status, pages, prog, cost, speed, fin_time):
@@ -1459,10 +1642,7 @@ class DualLayerPDFAppPySide6(QMainWindow):
             self.log(f"=== {summary} ===")
             
             if (success + skipped) > 0:
-                res = QMessageBox.question(self, "制作完成", f"{summary}\n\n是否立即在文件资源管理器中打开输出目录？", QMessageBox.Yes | QMessageBox.No)
-                if res == QMessageBox.Yes:
-                    target_d = self.entry_out_dir.text().strip() or (os.path.dirname(self.file_list[0]) if self.file_list else os.getcwd())
-                    subprocess.Popen(f'explorer "{os.path.abspath(target_d)}"')
+                self.log(f"💡 转换完成！您可以随时点击底部「📂 打开输出目录」按钮查看成果。")
 
 def main():
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
