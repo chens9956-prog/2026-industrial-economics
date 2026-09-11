@@ -116,7 +116,7 @@ def sanitize_math_text(text):
 
     return t
 
-def add_rich_paragraph(text_frame, raw_text, font_size=12.5, default_color=COLOR_TEXT_MAIN, default_bold=False, space_after=4, font_name=FONT_CN):
+def add_rich_paragraph(text_frame, raw_text, font_size=16.0, default_color=COLOR_TEXT_MAIN, default_bold=False, space_after=4, font_name=FONT_CN):
     """
     智能富文本段落渲染器：
     1. 全自动消除 LaTeX / $ / 乱码与多余的双引号 (", “, ”, \")
